@@ -1,37 +1,60 @@
-const nodemailer = require('nodemailer');
+const fetch = require('node-fetch');
+const { pool, initDB } = require('./db');
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_TELEGRAM_BOT_TOKEN';
 
-  const { email, code } = req.body;
-  if (!email || !code) return res.status(400).json({ error: 'Заполните поля' });
+module.exports = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'emsamsell@gmail.com',
-      pass: 'Almir210513'
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
-  });
 
-  try {
-    await transporter.sendMail({
-      from: '"EMSELL" <emsamsell@gmail.com>',
-      to: email,
-      subject: 'Код подтверждения входа EMSELL',
-      html: `
-        <div style="background:#0d0e12; color:#fff; padding:30px; font-family:sans-serif; border-radius:16px; max-width:450px; margin:0 auto; border:1px solid #262933;">
-          <h2 style="margin:0 0 10px 0; font-size:22px; color:#fff;">EMSELL</h2>
-          <p style="color:#aaa; font-size:14px; margin-bottom:20px;">Ваш одноразовый код авторизации:</p>
-          <div style="background:#16181e; font-size:32px; font-weight:bold; letter-spacing:8px; text-align:center; padding:16px; border-radius:10px; border:1px solid #262933; color:#fff;">
-            ${code}
-          </div>
-          <p style="color:#666; font-size:12px; margin-top:20px;">Если вы не запрашивали вход, проигнорируйте письмо.</p>
-        </div>
-      `
-    });
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-}
+    if (req.method !== 'POST') {
+        return res.status(405).json({ success: false, message: 'Метод не поддерживается' });
+    }
+
+    try {
+        await initDB();
+        const { chatId, username } = req.body;
+
+        if (!chatId || !username) {
+            return res.status(400).json({ success: false, message: 'Укажите Username и Chat ID!' });
+        }
+
+        const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Действителен 5 минут
+
+        // Сохранение кода в базу данных
+        await pool.query(
+            'INSERT INTO auth_codes (chat_id, code, expires_at) VALUES ($1, $2, $3)',
+            [chatId, generatedCode, expiresAt]
+        );
+
+        // Отправка в Telegram
+        const messageText = `🔐 *Код авторизации в магазине*\n\n` +
+            `👤 Пользователь: ${username}\n` +
+            `🔢 Ваш код: \`${generatedCode}\`\n\n` +
+            `Код действителен 5 минут.`;
+
+        const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: messageText, parse_mode: 'Markdown' })
+        });
+
+        const tgData = await tgRes.json();
+
+        if (!tgData.ok) {
+            return res.status(400).json({ success: false, message: 'Ошибка отправки Telegram API. Проверьте Chat ID.' });
+        }
+
+        return res.status(200).json({ success: true, message: 'Код успешно отправлен в Telegram и сохранен в БД!' });
+
+    } catch (error) {
+        console.error('API Error:', error);
+        return res.status(500).json({ success: false, message: 'Ошибка сервера при обращении к базе данных.' });
+    }
+};
