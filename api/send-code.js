@@ -1,60 +1,63 @@
-const fetch = require('node-fetch');
-const { pool, initDB } = require('./db');
+import nodemailer from 'nodemailer';
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_TELEGRAM_BOT_TOKEN';
+// Временное хранилище кодов (в реальном проекте используй DB)
+export const codesStore = global.codesStore || new Map();
+global.codesStore = codesStore;
 
-module.exports = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Метод не поддерживается' });
+  }
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+  const { email } = req.body;
+
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ message: 'Введите корректный email' });
+  }
+
+  // Генерация 6-значного случайного кода
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Сохраняем код в памяти
+  codesStore.set(email, {
+    code,
+    expiresAt: Date.now() + 5 * 60 * 1000 // Код действителен 5 минут
+  });
+
+  // Настройка транспорта Gmail SMTP
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'emsamsell@gmail.com',
+      pass: 'Almir210513'
     }
+  });
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ success: false, message: 'Метод не поддерживается' });
-    }
+  const mailOptions = {
+    from: '"Авторизация" <emsamsell@gmail.com>',
+    to: email,
+    subject: 'Код подтверждения для входа',
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f6f8; border-radius: 10px;">
+        <h2 style="color: #1e293b; text-align: center;">Код подтверждения</h2>
+        <p style="font-size: 16px; color: #475569; text-align: center;">Ваш код для авторизации в системе:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #3b82f6; background: #ffffff; padding: 12px 24px; border-radius: 8px; border: 1px solid #cbd5e1;">
+            ${code}
+          </span>
+        </div>
+        <p style="font-size: 13px; color: #94a3b8; text-align: center;">Код действителен в течение 5 минут. Если вы не запрашивали код, проигнорируйте это письмо.</p>
+      </div>
+    `
+  };
 
-    try {
-        await initDB();
-        const { chatId, username } = req.body;
-
-        if (!chatId || !username) {
-            return res.status(400).json({ success: false, message: 'Укажите Username и Chat ID!' });
-        }
-
-        const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Действителен 5 минут
-
-        // Сохранение кода в базу данных
-        await pool.query(
-            'INSERT INTO auth_codes (chat_id, code, expires_at) VALUES ($1, $2, $3)',
-            [chatId, generatedCode, expiresAt]
-        );
-
-        // Отправка в Telegram
-        const messageText = `🔐 *Код авторизации в магазине*\n\n` +
-            `👤 Пользователь: ${username}\n` +
-            `🔢 Ваш код: \`${generatedCode}\`\n\n` +
-            `Код действителен 5 минут.`;
-
-        const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text: messageText, parse_mode: 'Markdown' })
-        });
-
-        const tgData = await tgRes.json();
-
-        if (!tgData.ok) {
-            return res.status(400).json({ success: false, message: 'Ошибка отправки Telegram API. Проверьте Chat ID.' });
-        }
-
-        return res.status(200).json({ success: true, message: 'Код успешно отправлен в Telegram и сохранен в БД!' });
-
-    } catch (error) {
-        console.error('API Error:', error);
-        return res.status(500).json({ success: false, message: 'Ошибка сервера при обращении к базе данных.' });
-    }
-};
+  try {
+    await transporter.sendMail(mailOptions);
+    return res.status(200).json({ success: true, message: 'Код отправлен на email' });
+  } catch (error) {
+    console.error('Ошибка отправки Email:', error);
+    return res.status(500).json({ 
+      message: 'Не удалось отправить письмо. Если включена двухфакторная аутентификация в Google, создайте "Пароль приложения" в настройках аккаунта.' 
+    });
+  }
+}
