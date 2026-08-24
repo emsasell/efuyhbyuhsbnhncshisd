@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMSELL — Онлайн-магазин игровых товаров</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { background-color: #0d0e12; color: #f3f4f6; font-family: inter, system-ui, sans-serif; }
+    .bg-card { background-color: #16181e; }
+    .border-custom { border-color: #262933; }
+    .input-custom { background-color: #0f1015; border: 1px solid #262933; color: #fff; }
+    .input-custom:focus { border-color: #4f46e5; outline: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="border-b border-custom bg-card px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl overflow-hidden">
+        <img id="siteAvatar" src="https://i.ibb.co/L50N4x1/emsell-logo.jpg" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=EMSELL'" alt="EMSELL">
+      </div>
+      <div>
+        <h1 class="font-bold text-lg tracking-wide leading-none">EMSELL</h1>
+        <span class="text-xs text-gray-400">Маркетплейс товаров и услуг</span>
+      </div>
+    </div>
+    
+    <div id="userHeaderBlock" class="flex items-center gap-4"></div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="flex flex-1 max-w-7xl w-full mx-auto p-6 gap-6">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 flex flex-col gap-6 shrink-0">
+      <div class="bg-card p-4 rounded-xl border border-custom flex flex-col gap-2">
+        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Навигация</span>
+        <button onclick="switchTab('feed')" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-sm font-medium transition"><i data-lucide="layout-grid"></i> Лента</button>
+        <button onclick="switchTab('create')" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-sm font-medium transition"><i data-lucide="plus-circle"></i> Создать объявление</button>
+        <button onclick="switchTab('profile')" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-sm font-medium transition"><i data-lucide="user"></i> Профиль</button>
+        <button id="adminTabBtn" onclick="switchTab('admin')" class="hidden flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-sm font-medium transition"><i data-lucide="shield"></i> Админ Панель</button>
+      </div>
+
+      <div class="bg-card p-4 rounded-xl border border-custom flex flex-col gap-2">
+        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Игры и Плейсы</span>
+        <button onclick="filterGame('all')" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-800 text-sm text-left"><span class="flex items-center gap-2"><i data-lucide="gamepad-2"></i> Все игры</span> <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i></button>
+        <div class="text-xs text-gray-500 font-bold px-3 pt-2">Minecraft</div>
+        <button onclick="filterGame('Minecraft - Анархия')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Анархия / Сервера</button>
+        <button onclick="filterGame('Minecraft - Донат')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Предметы / Валюта</button>
+        
+        <div class="text-xs text-gray-500 font-bold px-3 pt-2">Roblox</div>
+        <button onclick="filterGame('Roblox - Blox Fruits')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Blox Fruits</button>
+        <button onclick="filterGame('Roblox - Adopt Me')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Adopt Me</button>
+        <button onclick="filterGame('Roblox - Brookhaven')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Brookhaven</button>
+        <button onclick="filterGame('Roblox - MM2')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ MM2</button>
+      </div>
+
+      <div class="bg-card p-4 rounded-xl border border-custom flex flex-col gap-3">
+        <a href="https://t.me/emsasell" target="_blank" class="flex items-center gap-2 text-xs font-medium bg-blue-600/20 text-blue-400 p-2.5 rounded-lg border border-blue-500/30 hover:bg-blue-600/30 transition">
+          <i data-lucide="send" class="w-4 h-4"></i> Наш Telegram канал
+        </a>
+        <a href="https://t.me/emsellhelpbot" target="_blank" class="flex items-center gap-2 text-xs font-medium bg-gray-800 text-gray-300 p-2.5 rounded-lg hover:bg-gray-700 transition">
+          <i data-lucide="headphone-off" class="w-4 h-4"></i> Поддержка (@emsellhelpbot)
+        </a>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="flex-1">
+
+      <!-- AUTH MODAL -->
+      <div id="authSection" class="bg-card border border-custom rounded-2xl p-8 max-w-md mx-auto my-12">
+        <div id="authStep1">
+          <h2 class="text-2xl font-bold mb-1">Вход в аккаунт</h2>
+          <p class="text-xs text-gray-400 mb-6">Введите почту и пароль для получения кода подтверждения.</p>
+          <form onsubmit="handleRequestCode(event)" class="space-y-4">
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Почта</label>
+              <input type="email" id="authEmail" required placeholder="name@domain.com" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Пароль</label>
+              <input type="password" id="authPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
+            </div>
+            <button type="submit" class="w-full bg-white text-black font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition text-sm">Получить код</button>
+          </form>
+        </div>
+
+        <div id="authStep2" class="hidden">
+          <h2 class="text-2xl font-bold mb-1">Подтверждение</h2>
+          <p class="text-xs text-gray-400 mb-6">Мы отправили 6-значный код на вашу почту. Введите его ниже:</p>
+          <form onsubmit="handleVerifyCode(event)" class="space-y-4">
+            <div>
+              <input type="text" id="authCode" maxlength="6" required placeholder="000000" class="w-full text-center tracking-widest text-xl font-mono py-3 rounded-lg input-custom">
+            </div>
+            <button type="submit" class="w-full bg-white text-black font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition text-sm">Подтвердить и войти</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- MAIN FEED TAB -->
+      <div id="tabFeed" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <input type="text" id="searchInput" oninput="renderItems()" placeholder="Поиск товаров и плейсов..." class="w-full max-w-md px-4 py-2 rounded-lg input-custom text-sm">
+          <div class="text-xs text-gray-400">Активные объявления</div>
+        </div>
+        <div id="itemsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- CREATE LISTING TAB -->
+      <div id="tabCreate" class="hidden bg-card p-6 rounded-2xl border border-custom max-w-2xl mx-auto">
+        <h2 class="text-xl font-bold mb-4">Новое объявление</h2>
+        <form onsubmit="handleCreateItem(event)" class="space-y-4">
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">Категория / Игра</label>
+            <select id="itemGame" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
+              <option value="Minecraft - Анархия">Minecraft - Анархия / Сервера</option>
+              <option value="Minecraft - Предметы">Minecraft - Предметы</option>
+              <option value="Roblox - Blox Fruits">Roblox - Blox Fruits</option>
+              <option value="Roblox - Adopt Me">Roblox - Adopt Me</option>
+              <option value="Roblox - MM2">Roblox - MM2</option>
+              <option value="Другое">Другая игра</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">Заголовок</label>
+            <input type="text" id="itemTitle" required placeholder="Например: Меч на Анархию #1" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">Описание</label>
+            <textarea id="itemDesc" required rows="3" placeholder="Укажите подробности..." class="w-full px-4 py-2.5 rounded-lg input-custom text-sm"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Цена</label>
+              <input type="number" id="itemPrice" required placeholder="100" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 mb-1 block">Валюта</label>
+              <select id="itemCurrency" onchange="toggleCustomCurrency(this.value)" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
+                <option value="₽">Рубли (₽)</option>
+                <option value="₴">Гривны (₴)</option>
+                <option value="$">Доллары ($)</option>
+                <option value="custom">Своя валюта...</option>
+              </select>
+            </div>
+          </div>
+          <div id="customCurrencyContainer" class="hidden">
+            <label class="text-xs text-gray-400 mb-1 block">Введите вашу валюту</label>
+            <input type="text" id="itemCustomCurrency" placeholder="например: Robux или EUR" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">Фото товара</label>
+            <input type="file" id="itemPhoto" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-white">
+          </div>
+          <button type="submit" class="w-full bg-white text-black font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition text-sm">Опубликовать</button>
+        </form>
+      </div>
+
+      <!-- PROFILE TAB -->
+      <div id="tabProfile" class="hidden space-y-6 max-w-2xl mx-auto">
+        <div class="bg-card p-6 rounded-2xl border border-custom flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-2xl" id="profileAvatar">U</div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 id="profileEmail" class="font-bold text-lg">user@mail.com</h2>
+                <span id="profileBadge" class="hidden text-blue-400" title="Верифицирован">✓</span>
+              </div>
+              <span class="text-xs text-green-400 flex items-center gap-1 mt-1"><span class="w-2 h-2 rounded-full bg-green-400"></span> В сети</span>
+            </div>
+          </div>
+          <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-semibold">Выйти</button>
+        </div>
+      </div>
+
+      <!-- ADMIN PANEL TAB -->
+      <div id="tabAdmin" class="hidden space-y-6 max-w-4xl mx-auto">
+        <div class="bg-card p-6 rounded-2xl border border-custom">
+          <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-red-400"><i data-lucide="shield"></i> Админ Панель (deemiix64@gmail.com)</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-300">
+              <thead class="bg-gray-900 text-xs uppercase text-gray-400 border-b border-custom">
+                <tr>
+                  <th class="p-3">Почта пользователя</th>
+                  <th class="p-3">Статус</th>
+                  <th class="p-3">Галочка</th>
+                  <th class="p-3">Действия</th>
+                </tr>
+              </thead>
+              <tbody id="adminUserTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- CHAT MODAL -->
+  <div id="chatModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+    <div class="bg-card border border-custom rounded-2xl w-full max-w-lg flex flex-col h-[500px]">
+      <div class="p-4 border-b border-custom flex justify-between items-center">
+        <div>
+          <h3 id="chatSellerEmail" class="font-bold text-sm">Продавец</h3>
+          <span id="chatSellerStatus" class="text-xs text-gray-400">Был в сети 5 мин. назад</span>
+        </div>
+        <button onclick="closeChat()" class="text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
+      </div>
+      <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3"></div>
+      <form onsubmit="sendMessage(event)" class="p-4 border-t border-custom flex gap-2">
+        <input type="text" id="chatInput" required placeholder="Напишите сообщение..." class="flex-1 px-4 py-2 rounded-lg input-custom text-sm">
+        <button type="submit" class="bg-white text-black px-4 py-2 rounded-lg font-semibold text-sm">Отправить</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_EMAIL = 'deemiix64@gmail.com';
+    let currentUser = JSON.parse(localStorage.getItem('emsell_user')) || null;
+    let pendingCode = null;
+    let pendingEmail = null;
+    let activeFilter = 'all';
+
+    let users = JSON.parse(localStorage.getItem('emsell_users')) || [
+      { email: 'deemiix64@gmail.com', isBanned: false, hasBadge: true, lastSeen: 'В сети' },
+      { email: 'seller@gmail.com', isBanned: false, hasBadge: true, lastSeen: 'Был(а) в сети 3 мин. назад' }
+    ];
+
+    let items = JSON.parse(localStorage.getItem('emsell_items')) || [
+      {
+        id: 1,
+        title: 'Меч Бога Анархии 1000lvl',
+        game: 'Minecraft - Анархия',
+        desc: 'Топовый зачарованный меч. Передача сразу после оплаты.',
+        price: '250',
+        currency: '₽',
+        photo: 'https://placehold.co/400x200/1e293b/ffffff?text=Minecraft+Item',
+        seller: 'seller@gmail.com',
+        hasBadge: true
+      }
+    ];
+
+    let messages = JSON.parse(localStorage.getItem('emsell_chat')) || [];
+
+    function saveState() {
+      localStorage.setItem('emsell_users', JSON.stringify(users));
+      localStorage.setItem('emsell_items', JSON.stringify(items));
+      localStorage.setItem('emsell_chat', JSON.stringify(messages));
+    }
+
+    function playNotificationSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } catch (e) {}
+    }
+
+    async function handleRequestCode(e) {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value;
+      const user = users.find(u => u.email === email);
+      if (user && user.isBanned) return alert('Ваш аккаунт заблокирован!');
+
+      pendingCode = Math.floor(100000 + Math.random() * 900000).toString();
+      pendingEmail = email;
+
+      try {
+        const res = await fetch('/api/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code: pendingCode })
+        });
+        if (res.ok) {
+          document.getElementById('authStep1').classList.add('hidden');
+          document.getElementById('authStep2').classList.remove('hidden');
+        } else {
+          alert('Ошибка отправки кода на почту');
+        }
+      } catch (err) {
+        alert('Ошибка API');
+      }
+    }
+
+    function handleVerifyCode(e) {
+      e.preventDefault();
+      const code = document.getElementById('authCode').value;
+      if (code === pendingCode) {
+        let user = users.find(u => u.email === pendingEmail);
+        if (!user) {
+          user = { email: pendingEmail, isBanned: false, hasBadge: false, lastSeen: 'В сети' };
+          users.push(user);
+          saveState();
+        }
+        currentUser = user;
+        localStorage.setItem('emsell_user', JSON.stringify(currentUser));
+        initApp();
+      } else {
+        alert('Неверный код!');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('emsell_user');
+      currentUser = null;
+      initApp();
+    }
+
+    function switchTab(tab) {
+      ['tabFeed', 'tabCreate', 'tabProfile', 'tabAdmin'].forEach(t => document.getElementById(t).classList.add('hidden'));
+      if (tab === 'feed') document.getElementById('tabFeed').classList.remove('hidden');
+      if (tab === 'create') document.getElementById('tabCreate').classList.remove('hidden');
+      if (tab === 'profile') document.getElementById('tabProfile').classList.remove('hidden');
+      if (tab === 'admin') document.getElementById('tabAdmin').classList.remove('hidden');
+    }
+
+    function filterGame(game) {
+      activeFilter = game;
+      switchTab('feed');
+      renderItems();
+    }
+
+    function toggleCustomCurrency(val) {
+      document.getElementById('customCurrencyContainer').classList.toggle('hidden', val !== 'custom');
+    }
+
+    function handleCreateItem(e) {
+      e.preventDefault();
+      if (!currentUser) return alert('Сначала войдите в аккаунт');
+
+      const fileInput = document.getElementById('itemPhoto');
+      const currencyVal = document.getElementById('itemCurrency').value;
+      const finalCurrency = currencyVal === 'custom' ? document.getElementById('itemCustomCurrency').value : currencyVal;
+
+      const newItem = {
+        id: Date.now(),
+        title: document.getElementById('itemTitle').value,
+        game: document.getElementById('itemGame').value,
+        desc: document.getElementById('itemDesc').value,
+        price: document.getElementById('itemPrice').value,
+        currency: finalCurrency || '₽',
+        photo: 'https://placehold.co/400x200/1e293b/ffffff?text=Item',
+        seller: currentUser.email,
+        hasBadge: currentUser.hasBadge
+      };
+
+      if (fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          newItem.photo = evt.target.result;
+          items.unshift(newItem);
+          saveState();
+          switchTab('feed');
+          renderItems();
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        items.unshift(newItem);
+        saveState();
+        switchTab('feed');
+        renderItems();
+      }
+    }
+
+    function renderItems() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const container = document.getElementById('itemsContainer');
+      container.innerHTML = '';
+
+      items
+        .filter(i => activeFilter === 'all' || i.game === activeFilter)
+        .filter(i => i.title.toLowerCase().includes(search) || i.desc.toLowerCase().includes(search))
+        .forEach(item => {
+          container.innerHTML += `
+            <div class="bg-card border border-custom rounded-xl p-4 flex flex-col justify-between gap-3">
+              ${item.photo ? `<img src="${item.photo}" class="w-full h-36 object-cover rounded-lg">` : ''}
+              <div>
+                <span class="text-[10px] font-bold uppercase bg-gray-800 text-gray-400 px-2 py-0.5 rounded">${item.game}</span>
+                <h3 class="font-bold text-base mt-2">${item.title}</h3>
+                <p class="text-xs text-gray-400 mt-1 line-clamp-2">${item.desc}</p>
+              </div>
+              <div class="flex items-center justify-between border-t border-custom pt-3 mt-2">
+                <div>
+                  <span class="text-lg font-bold">${item.price} ${item.currency}</span>
+                  <div class="text-[11px] text-gray-400 flex items-center gap-1">
+                    ${item.seller} ${item.hasBadge ? '<span class="text-blue-400 font-bold">✓</span>' : ''}
+                  </div>
+                </div>
+                <button onclick="openChat('${item.seller}')" class="bg-white text-black text-xs font-bold px-3 py-2 rounded-lg hover:bg-gray-200">Написать</button>
+              </div>
+            </div>
+          `;
+        });
+    }
+
+    function renderAdmin() {
+      const tbody = document.getElementById('adminUserTable');
+      tbody.innerHTML = '';
+      users.forEach(u => {
+        tbody.innerHTML += `
+          <tr class="border-b border-custom">
+            <td class="p-3">${u.email}</td>
+            <td class="p-3">${u.isBanned ? '<span class="text-red-400 font-bold">Забанен</span>' : '<span class="text-green-400">Активен</span>'}</td>
+            <td class="p-3">${u.hasBadge ? '<span class="text-blue-400 font-bold">Есть (✓)</span>' : 'Нет'}</td>
+            <td class="p-3 flex gap-2">
+              <button onclick="toggleBan('${u.email}')" class="px-2 py-1 rounded bg-gray-800 text-xs hover:bg-gray-700">${u.isBanned ? 'Разбанить' : 'Забанить'}</button>
+              <button onclick="toggleBadge('${u.email}')" class="px-2 py-1 rounded bg-blue-600/20 text-blue-400 text-xs hover:bg-blue-600/30">Галочка</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function toggleBan(email) {
+      const u = users.find(x => x.email === email);
+      if (u) u.isBanned = !u.isBanned;
+      saveState();
+      renderAdmin();
+    }
+
+    function toggleBadge(email) {
+      const u = users.find(x => x.email === email);
+      if (u) {
+        u.hasBadge = !u.hasBadge;
+        items.forEach(i => { if (i.seller === email) i.hasBadge = u.hasBadge; });
+      }
+      saveState();
+      renderAdmin();
+      renderItems();
+    }
+
+    let activeChatSeller = null;
+    function openChat(sellerEmail) {
+      if (!currentUser) return alert('Войдите для чата');
+      activeChatSeller = sellerEmail;
+      const seller = users.find(u => u.email === sellerEmail) || { lastSeen: 'Не сети' };
+      document.getElementById('chatSellerEmail').innerText = sellerEmail;
+      document.getElementById('chatSellerStatus').innerText = seller.lastSeen;
+      document.getElementById('chatModal').classList.remove('hidden');
+      renderMessages();
+    }
+
+    function closeChat() { document.getElementById('chatModal').classList.add('hidden'); }
+
+    function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      messages.push({
+        from: currentUser.email,
+        to: activeChatSeller,
+        text: input.value,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      input.value = '';
+      saveState();
+      playNotificationSound();
+      renderMessages();
+    }
+
+    function renderMessages() {
+      const box = document.getElementById('chatMessages');
+      box.innerHTML = '';
+      messages
+        .filter(m => (m.from === currentUser.email && m.to === activeChatSeller) || (m.from === activeChatSeller && m.to === currentUser.email))
+        .forEach(m => {
+          const isMe = m.from === currentUser.email;
+          box.innerHTML += `
+            <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+              <div class="max-w-[80%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-200'}">
+                ${m.text}
+              </div>
+              <span class="text-[9px] text-gray-500 mt-0.5">${m.time}</span>
+            </div>
+          `;
+        });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function initApp() {
+      if (currentUser) {
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('userHeaderBlock').innerHTML = `
+          <span class="text-xs text-gray-300">${currentUser.email} ${currentUser.hasBadge ? '<span class="text-blue-400">✓</span>' : ''}</span>
+        `;
+        document.getElementById('profileEmail').innerText = currentUser.email;
+        document.getElementById('profileAvatar').innerText = currentUser.email[0].toUpperCase();
+        document.getElementById('profileBadge').classList.toggle('hidden', !currentUser.hasBadge);
+
+        if (currentUser.email === ADMIN_EMAIL) {
+          document.getElementById('adminTabBtn').classList.remove('hidden');
+          renderAdmin();
+        } else {
+          document.getElementById('adminTabBtn').classList.add('hidden');
+        }
+        switchTab('feed');
+        renderItems();
+      } else {
+        document.getElementById('authSection').classList.remove('hidden');
+        document.getElementById('userHeaderBlock').innerHTML = '';
+        ['tabFeed', 'tabCreate', 'tabProfile', 'tabAdmin'].forEach(t => document.getElementById(t).classList.add('hidden'));
+      }
+      lucide.createIcons();
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
