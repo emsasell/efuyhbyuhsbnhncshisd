@@ -3,378 +3,547 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EMSELL — Онлайн-магазин игровых товаров</title>
+  <title>EMSELL — Твой путь к товарам в играх</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body { background-color: #0d0e12; color: #f3f4f6; font-family: inter, system-ui, sans-serif; }
-    .bg-card { background-color: #16181e; }
-    .border-custom { border-color: #262933; }
-    .input-custom { background-color: #0f1015; border: 1px solid #262933; color: #fff; }
-    .input-custom:focus { border-color: #4f46e5; outline: none; }
+    body { background-color: #090a0d; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
+    .bg-card { background-color: #121318; }
+    .border-custom { border-color: #20232c; }
+    .input-custom { background-color: #16181e; border: 1px solid #262933; color: #fff; }
+    .input-custom:focus { border-color: #ffffff; outline: none; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col justify-between">
 
-  <!-- Header -->
-  <header class="border-b border-custom bg-card px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl overflow-hidden">
-        <img id="siteAvatar" src="https://i.ibb.co/L50N4x1/emsell-logo.jpg" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=EMSELL'" alt="EMSELL">
-      </div>
-      <div>
-        <h1 class="font-bold text-lg tracking-wide leading-none">EMSELL</h1>
-        <span class="text-xs text-gray-400">Маркетплейс товаров и услуг</span>
-      </div>
-    </div>
-    
-    <div id="userHeaderBlock" class="flex items-center gap-4"></div>
-  </header>
-
-  <!-- Main Container -->
-  <div class="flex flex-1 max-w-7xl w-full mx-auto p-6 gap-6">
-
-    <!-- Sidebar Navigation -->
-    <aside class="w-64 flex flex-col gap-6 shrink-0">
-      <div class="bg-card p-4 rounded-xl border border-custom flex flex-col gap-2">
-        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Навигация</span>
-        <button onclick="switchTab('feed')" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-sm font-medium transition"><i data-lucide="layout-grid"></i> Лента</button>
-        <button onclick="switchTab('create')" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-sm font-medium transition"><i data-lucide="plus-circle"></i> Создать объявление</button>
-        <button onclick="switchTab('profile')" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-sm font-medium transition"><i data-lucide="user"></i> Профиль</button>
-        <button id="adminTabBtn" onclick="switchTab('admin')" class="hidden flex items-center gap-3 px-3 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-sm font-medium transition"><i data-lucide="shield"></i> Админ Панель</button>
-      </div>
-
-      <div class="bg-card p-4 rounded-xl border border-custom flex flex-col gap-2">
-        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Игры и Плейсы</span>
-        <button onclick="filterGame('all')" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-800 text-sm text-left"><span class="flex items-center gap-2"><i data-lucide="gamepad-2"></i> Все игры</span> <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i></button>
-        <div class="text-xs text-gray-500 font-bold px-3 pt-2">Minecraft</div>
-        <button onclick="filterGame('Minecraft - Анархия')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Анархия / Сервера</button>
-        <button onclick="filterGame('Minecraft - Донат')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Предметы / Валюта</button>
-        
-        <div class="text-xs text-gray-500 font-bold px-3 pt-2">Roblox</div>
-        <button onclick="filterGame('Roblox - Blox Fruits')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Blox Fruits</button>
-        <button onclick="filterGame('Roblox - Adopt Me')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Adopt Me</button>
-        <button onclick="filterGame('Roblox - Brookhaven')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ Brookhaven</button>
-        <button onclick="filterGame('Roblox - MM2')" class="px-3 py-1.5 text-xs text-gray-300 hover:text-white text-left pl-6">└ MM2</button>
-      </div>
-
-      <div class="bg-card p-4 rounded-xl border border-custom flex flex-col gap-3">
-        <a href="https://t.me/emsasell" target="_blank" class="flex items-center gap-2 text-xs font-medium bg-blue-600/20 text-blue-400 p-2.5 rounded-lg border border-blue-500/30 hover:bg-blue-600/30 transition">
-          <i data-lucide="send" class="w-4 h-4"></i> Наш Telegram канал
-        </a>
-        <a href="https://t.me/emsellhelpbot" target="_blank" class="flex items-center gap-2 text-xs font-medium bg-gray-800 text-gray-300 p-2.5 rounded-lg hover:bg-gray-700 transition">
-          <i data-lucide="headphone-off" class="w-4 h-4"></i> Поддержка (@emsellhelpbot)
-        </a>
-      </div>
-    </aside>
-
-    <!-- Content Area -->
-    <main class="flex-1">
-
-      <!-- AUTH MODAL -->
-      <div id="authSection" class="bg-card border border-custom rounded-2xl p-8 max-w-md mx-auto my-12">
-        <div id="authStep1">
-          <h2 class="text-2xl font-bold mb-1">Вход в аккаунт</h2>
-          <p class="text-xs text-gray-400 mb-6">Введите почту и пароль для получения кода подтверждения.</p>
-          <form onsubmit="handleRequestCode(event)" class="space-y-4">
-            <div>
-              <label class="text-xs text-gray-400 mb-1 block">Почта</label>
-              <input type="email" id="authEmail" required placeholder="name@domain.com" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
-            </div>
-            <div>
-              <label class="text-xs text-gray-400 mb-1 block">Пароль</label>
-              <input type="password" id="authPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
-            </div>
-            <button type="submit" class="w-full bg-white text-black font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition text-sm">Получить код</button>
-          </form>
-        </div>
-
-        <div id="authStep2" class="hidden">
-          <h2 class="text-2xl font-bold mb-1">Подтверждение</h2>
-          <p class="text-xs text-gray-400 mb-6">Мы отправили 6-значный код на вашу почту. Введите его ниже:</p>
-          <form onsubmit="handleVerifyCode(event)" class="space-y-4">
-            <div>
-              <input type="text" id="authCode" maxlength="6" required placeholder="000000" class="w-full text-center tracking-widest text-xl font-mono py-3 rounded-lg input-custom">
-            </div>
-            <button type="submit" class="w-full bg-white text-black font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition text-sm">Подтвердить и войти</button>
-          </form>
-        </div>
-      </div>
-
-      <!-- MAIN FEED TAB -->
-      <div id="tabFeed" class="hidden space-y-4">
-        <div class="flex items-center justify-between">
-          <input type="text" id="searchInput" oninput="renderItems()" placeholder="Поиск товаров и плейсов..." class="w-full max-w-md px-4 py-2 rounded-lg input-custom text-sm">
-          <div class="text-xs text-gray-400">Активные объявления</div>
-        </div>
-        <div id="itemsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-      </div>
-
-      <!-- CREATE LISTING TAB -->
-      <div id="tabCreate" class="hidden bg-card p-6 rounded-2xl border border-custom max-w-2xl mx-auto">
-        <h2 class="text-xl font-bold mb-4">Новое объявление</h2>
-        <form onsubmit="handleCreateItem(event)" class="space-y-4">
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block">Категория / Игра</label>
-            <select id="itemGame" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
-              <option value="Minecraft - Анархия">Minecraft - Анархия / Сервера</option>
-              <option value="Minecraft - Предметы">Minecraft - Предметы</option>
-              <option value="Roblox - Blox Fruits">Roblox - Blox Fruits</option>
-              <option value="Roblox - Adopt Me">Roblox - Adopt Me</option>
-              <option value="Roblox - MM2">Roblox - MM2</option>
-              <option value="Другое">Другая игра</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block">Заголовок</label>
-            <input type="text" id="itemTitle" required placeholder="Например: Меч на Анархию #1" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
-          </div>
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block">Описание</label>
-            <textarea id="itemDesc" required rows="3" placeholder="Укажите подробности..." class="w-full px-4 py-2.5 rounded-lg input-custom text-sm"></textarea>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-xs text-gray-400 mb-1 block">Цена</label>
-              <input type="number" id="itemPrice" required placeholder="100" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
-            </div>
-            <div>
-              <label class="text-xs text-gray-400 mb-1 block">Валюта</label>
-              <select id="itemCurrency" onchange="toggleCustomCurrency(this.value)" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
-                <option value="₽">Рубли (₽)</option>
-                <option value="₴">Гривны (₴)</option>
-                <option value="$">Доллары ($)</option>
-                <option value="custom">Своя валюта...</option>
-              </select>
-            </div>
-          </div>
-          <div id="customCurrencyContainer" class="hidden">
-            <label class="text-xs text-gray-400 mb-1 block">Введите вашу валюту</label>
-            <input type="text" id="itemCustomCurrency" placeholder="например: Robux или EUR" class="w-full px-4 py-2.5 rounded-lg input-custom text-sm">
-          </div>
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block">Фото товара</label>
-            <input type="file" id="itemPhoto" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-white">
-          </div>
-          <button type="submit" class="w-full bg-white text-black font-semibold py-2.5 rounded-lg hover:bg-gray-200 transition text-sm">Опубликовать</button>
-        </form>
-      </div>
-
-      <!-- PROFILE TAB -->
-      <div id="tabProfile" class="hidden space-y-6 max-w-2xl mx-auto">
-        <div class="bg-card p-6 rounded-2xl border border-custom flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-2xl" id="profileAvatar">U</div>
-            <div>
-              <div class="flex items-center gap-2">
-                <h2 id="profileEmail" class="font-bold text-lg">user@mail.com</h2>
-                <span id="profileBadge" class="hidden text-blue-400" title="Верифицирован">✓</span>
-              </div>
-              <span class="text-xs text-green-400 flex items-center gap-1 mt-1"><span class="w-2 h-2 rounded-full bg-green-400"></span> В сети</span>
-            </div>
-          </div>
-          <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-semibold">Выйти</button>
-        </div>
-      </div>
-
-      <!-- ADMIN PANEL TAB -->
-      <div id="tabAdmin" class="hidden space-y-6 max-w-4xl mx-auto">
-        <div class="bg-card p-6 rounded-2xl border border-custom">
-          <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-red-400"><i data-lucide="shield"></i> Админ Панель (deemiix64@gmail.com)</h2>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-gray-300">
-              <thead class="bg-gray-900 text-xs uppercase text-gray-400 border-b border-custom">
-                <tr>
-                  <th class="p-3">Почта пользователя</th>
-                  <th class="p-3">Статус</th>
-                  <th class="p-3">Галочка</th>
-                  <th class="p-3">Действия</th>
-                </tr>
-              </thead>
-              <tbody id="adminUserTable"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-    </main>
+  <!-- Toast Notification (Скриншот 4) -->
+  <div id="toast" class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-[#1c0d0f] border border-red-900/60 text-red-200 px-6 py-3 rounded-xl flex items-center justify-between w-full max-w-xl shadow-2xl">
+    <span id="toastMsg" class="text-sm font-medium">Неверный код!</span>
+    <button onclick="hideToast()" class="text-red-400 hover:text-white ml-4"><i data-lucide="x" class="w-4 h-4"></i></button>
   </div>
 
-  <!-- CHAT MODAL -->
-  <div id="chatModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-    <div class="bg-card border border-custom rounded-2xl w-full max-w-lg flex flex-col h-[500px]">
+  <!-- Main Container -->
+  <div id="appContainer" class="w-full flex-1 flex flex-col">
+
+    <!-- AUTHENTICATION SCREEN (Скриншоты 1, 2, 3) -->
+    <div id="screenAuth" class="flex-1 flex items-center justify-center p-4">
+      <div class="bg-card border border-custom rounded-2xl w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 overflow-hidden shadow-2xl">
+        
+        <!-- Left Branding Panel -->
+        <div class="p-8 border-b md:border-b-0 md:border-r border-custom flex flex-col justify-between space-y-6">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center font-black text-2xl mb-6 shadow-lg">
+              E
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight mb-2">EMSELL — твой путь к топ луту</h1>
+            <p class="text-xs text-gray-400 leading-relaxed mb-4">Покупай и продавай игровые предметы, валюту и аккаунты без хлопот. Здесь тебя народ поймет!</p>
+            <p class="text-xs text-gray-500 leading-relaxed">Забудь про бесконечные поиски в соцсетях и хаос в комментариях. На EMSELL искать товары намного проще, быстрее и безопаснее благодаря удобным фильтрам и структурированным заявкам.</p>
+          </div>
+          <a href="https://t.me/emsasell" target="_blank" class="inline-flex items-center gap-2 bg-[#1b222d] text-blue-400 border border-blue-500/20 px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-blue-600/20 transition w-fit">
+            <i data-lucide="send" class="w-4 h-4"></i> Наш Telegram канал
+          </a>
+        </div>
+
+        <!-- Right Form Panel -->
+        <div class="p-8 flex flex-col justify-center">
+          
+          <!-- View 1: Register (Скриншот 1) -->
+          <div id="authViewRegister">
+            <h2 class="text-xl font-bold mb-6">Регистрация</h2>
+            <form onsubmit="handleRegisterSubmit(event)" class="space-y-4">
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-medium">Юзер</label>
+                <input type="text" id="regUser" required placeholder="Введите ник" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-medium">Почта</label>
+                <input type="email" id="regEmail" required placeholder="name@domain.com" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-medium">Пароль</label>
+                <input type="password" id="regPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+              <div class="pt-2 flex items-center justify-between">
+                <button type="submit" class="bg-white text-black font-semibold px-6 py-2.5 rounded-xl hover:bg-gray-200 transition text-sm">Зарегистрироваться</button>
+                <button type="button" onclick="toggleAuthView('login')" class="text-xs text-gray-400 hover:text-white">Есть аккаунт? <span class="font-bold text-white">Войти</span></button>
+              </div>
+            </form>
+          </div>
+
+          <!-- View 2: Login (Скриншот 2) -->
+          <div id="authViewLogin" class="hidden">
+            <h2 class="text-xl font-bold mb-6">Вход в аккаунт</h2>
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-medium">Юзер</label>
+                <input type="text" id="loginUser" required placeholder="Введите ник" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-medium">Почта</label>
+                <input type="email" id="loginEmail" required placeholder="name@domain.com" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-medium">Пароль</label>
+                <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+              
+              <!-- Cloudflare Turnstile Simulation -->
+              <div class="bg-[#16181e] border border-custom p-3 rounded-xl flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-black font-bold text-xs">✓</div>
+                  <span class="text-xs font-medium">Успешно.</span>
+                </div>
+                <div class="text-[10px] text-gray-500 text-right">
+                  <strong>CLOUDFLARE</strong><br>Конфиденциальность
+                </div>
+              </div>
+
+              <div class="pt-2 flex items-center justify-between">
+                <button type="submit" class="bg-white text-black font-semibold px-6 py-2.5 rounded-xl hover:bg-gray-200 transition text-sm">Войти</button>
+                <button type="button" onclick="toggleAuthView('register')" class="text-xs text-gray-400 hover:text-white">Еще нет аккаунта? <span class="font-bold text-white">Регистрация</span></button>
+              </div>
+            </form>
+          </div>
+
+          <!-- View 3: Verification Code (Скриншот 3) -->
+          <div id="authViewCode" class="hidden">
+            <h2 class="text-xl font-bold mb-2">Регистрация</h2>
+            <p class="text-xs text-gray-400 mb-6">Мы отправили 6-значный код подтверждения на вашу почту. Введите его ниже:</p>
+            <form onsubmit="handleVerifyCode(event)" class="space-y-6">
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block font-medium">Код подтверждения</label>
+                <input type="text" id="codeVal" maxlength="6" required placeholder="000000" class="w-full text-center tracking-[0.5em] text-xl font-mono py-3 rounded-xl input-custom">
+              </div>
+              <button type="submit" class="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-200 transition text-sm">Подтвердить и войти</button>
+              <div class="text-center">
+                <button type="button" onclick="toggleAuthView('register')" class="text-xs text-gray-400 hover:text-white">Назад к регистрации</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN PLATFORM INTERFACE (Скриншоты 5, 6, 7, 8) -->
+    <div id="screenMain" class="hidden flex-1 flex flex-col">
+      
+      <!-- Top Header -->
+      <header class="border-b border-custom bg-card px-6 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchPage('feed')">
+          <div class="w-7 h-7 rounded-lg bg-white text-black flex items-center justify-center font-bold text-sm">E</div>
+          <span class="font-bold text-sm tracking-wide">EMSELL</span>
+        </div>
+        <div id="headerUserInfo" class="flex items-center gap-3 text-xs"></div>
+      </header>
+
+      <!-- Main Body Grid -->
+      <div class="max-w-6xl w-full mx-auto p-6 flex-1 grid grid-cols-1 md:grid-cols-4 gap-6">
+        
+        <!-- Left Sidebar Navigation (Скриншот 5) -->
+        <aside class="space-y-6">
+          <div class="bg-card p-4 rounded-2xl border border-custom space-y-1">
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-3 mb-2">НАВИГАЦИЯ</div>
+            <button onclick="switchPage('feed')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-gray-800 transition"><i data-lucide="layout-grid" class="w-4 h-4"></i> Лента</button>
+            <button onclick="switchPage('create')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-gray-800 transition"><i data-lucide="plus" class="w-4 h-4"></i> Создать</button>
+            <button onclick="switchPage('profile')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-gray-800 transition"><i data-lucide="user" class="w-4 h-4"></i> Профиль</button>
+            <button id="navAdminBtn" onclick="switchPage('admin')" class="hidden w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition"><i data-lucide="shield" class="w-4 h-4"></i> Админ Панель</button>
+          </div>
+
+          <div class="bg-card p-4 rounded-2xl border border-custom space-y-1">
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-3 mb-2">ИГРЫ</div>
+            <button onclick="filterGame('all')" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold hover:bg-gray-800 transition"><span>Все игры</span> <i data-lucide="gamepad-2" class="w-4 h-4 text-purple-400"></i></button>
+            <button onclick="filterGame('Brookhaven')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition">Brookhaven</button>
+            <button onclick="filterGame('Adopt Me')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition">Adopt Me</button>
+            <button onclick="filterGame('Blox Fruits')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition">Blox Fruits</button>
+            <button onclick="filterGame('MM2')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition">MM2</button>
+            <button onclick="filterGame('Minecraft')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition">Minecraft</button>
+          </div>
+        </aside>
+
+        <!-- Right Dynamic Content Area -->
+        <main class="md:col-span-3 space-y-4">
+
+          <!-- PAGE 1: FEED / ЛЕНТА (Скриншот 5) -->
+          <div id="pageFeed" class="space-y-4">
+            <input type="text" id="searchInput" oninput="renderFeed()" placeholder="Ищи популярные хаусы, плейсы, предметы.." class="w-full px-4 py-3 rounded-2xl input-custom text-sm">
+            
+            <div class="flex items-center justify-between pt-2">
+              <h3 class="text-sm font-bold text-gray-300">Активные объявления</h3>
+              <select class="bg-card border border-custom px-3 py-1.5 rounded-xl text-xs text-gray-400">
+                <option>Сначала новые</option>
+              </select>
+            </div>
+
+            <div id="feedList" class="space-y-3"></div>
+          </div>
+
+          <!-- PAGE 2: CREATE LISTING / СОЗДАТЬ (Скриншот 6) -->
+          <div id="pageCreate" class="hidden bg-card p-6 rounded-2xl border border-custom max-w-xl mx-auto space-y-6">
+            <div class="flex items-center justify-between border-b border-custom pb-4">
+              <h2 class="text-lg font-bold">Новое объявление</h2>
+              <button onclick="switchPage('feed')" class="text-xs text-gray-400 hover:text-white">Отменить</button>
+            </div>
+
+            <form onsubmit="handleCreateSubmit(event)" class="space-y-4">
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block">Категория (режим)</label>
+                <select id="createGame" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+                  <option value="Brookhaven">Brookhaven</option>
+                  <option value="Adopt Me">Adopt Me</option>
+                  <option value="Blox Fruits">Blox Fruits</option>
+                  <option value="MM2">MM2</option>
+                  <option value="Minecraft">Minecraft</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block">Заголовок</label>
+                <input type="text" id="createTitle" required placeholder="Например: Набор в клан / Продажа меча" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block">Описание</label>
+                <textarea id="createDesc" required rows="4" placeholder="Укажите требования и правила..." class="w-full px-4 py-2.5 rounded-xl input-custom text-sm"></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs text-gray-400 mb-1.5 block">Цена</label>
+                  <input type="number" id="createPrice" required placeholder="100" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+                </div>
+                <div>
+                  <label class="text-xs text-gray-400 mb-1.5 block">Валюта</label>
+                  <select id="createCurrency" onchange="toggleCustomCurrency(this.value)" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+                    <option value="₽">Рубли (₽)</option>
+                    <option value="₴">Гривны (₴)</option>
+                    <option value="$">Доллары ($)</option>
+                    <option value="custom">Своя валюта...</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="customCurrencyBox" class="hidden">
+                <label class="text-xs text-gray-400 mb-1.5 block">Укажите свою валюту</label>
+                <input type="text" id="createCustomCurrency" placeholder="например: Robux" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block">Фото товара</label>
+                <input type="file" id="createPhoto" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-gray-800 file:text-white">
+              </div>
+
+              <div>
+                <label class="text-xs text-gray-400 mb-1.5 block">Контакт для связи (Telegram)</label>
+                <input type="text" id="createTg" required placeholder="@username" class="w-full px-4 py-2.5 rounded-xl input-custom text-sm">
+              </div>
+
+              <button type="submit" class="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-200 transition text-sm">Опубликовать</button>
+            </form>
+          </div>
+
+          <!-- PAGE 3: PROFILE / ПРОФИЛЬ (Скриншот 7) -->
+          <div id="pageProfile" class="hidden space-y-6">
+            <div class="bg-card p-6 rounded-2xl border border-custom">
+              <div class="flex items-center gap-4 mb-6">
+                <div id="profAvatar" class="w-16 h-16 rounded-full bg-gray-800 border border-custom flex items-center justify-center font-bold text-2xl">D</div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 id="profUser" class="font-bold text-lg">dark</h2>
+                    <span id="profBadge" class="hidden text-blue-400">✓</span>
+                  </div>
+                  <div id="profEmail" class="text-xs text-gray-400">dark.masyka@gmail.com</div>
+                  <button class="text-xs text-blue-400 hover:underline mt-1 block">Изменить аватар</button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 border-t border-custom pt-4">
+                <button onclick="logout()" class="w-full bg-[#1c1d24] text-gray-300 py-2.5 rounded-xl text-xs font-semibold hover:bg-gray-800">Выйти</button>
+                <button onclick="logout()" class="w-full bg-red-950/30 text-red-400 border border-red-900/40 py-2.5 rounded-xl text-xs font-semibold hover:bg-red-900/40">Удалить аккаунт</button>
+              </div>
+            </div>
+
+            <!-- Settings Links Block -->
+            <div class="space-y-2">
+              <div class="text-xs font-bold text-gray-500 uppercase px-1">Настройки</div>
+              <div class="bg-card rounded-2xl border border-custom divide-y divide-custom">
+                <button onclick="switchPage('faq')" class="w-full flex items-center justify-between p-4 text-xs font-semibold hover:bg-gray-800/50 transition">
+                  <span class="flex items-center gap-2">📌 Правила и FAQ</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4 text-gray-500"></i>
+                </button>
+                <a href="https://t.me/emsellhelpbot" target="_blank" class="flex items-center justify-between p-4 text-xs font-semibold hover:bg-gray-800/50 transition">
+                  <span class="flex items-center gap-2">💬 Поддержка в Telegram</span>
+                  <i data-lucide="external-link" class="w-4 h-4 text-gray-500"></i>
+                </a>
+                <div class="flex items-center justify-between p-4 text-xs font-semibold">
+                  <span class="flex items-center gap-2">🌐 Язык: РУС</span>
+                  <i data-lucide="arrow-left-right" class="w-4 h-4 text-gray-500"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats Block -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-card p-5 rounded-2xl border border-custom">
+                <div id="statCount" class="text-2xl font-bold">0</div>
+                <div class="text-xs text-gray-400 mt-1">Объявлений</div>
+              </div>
+              <div class="bg-card p-5 rounded-2xl border border-custom">
+                <div class="text-2xl font-bold">Standard</div>
+                <div class="text-xs text-gray-400 mt-1">Доступ</div>
+              </div>
+            </div>
+
+            <!-- User Listings -->
+            <div class="space-y-2">
+              <div class="text-xs font-bold text-gray-500 uppercase px-1">Ваши публикации</div>
+              <div id="userListings" class="bg-card p-8 rounded-2xl border border-custom text-center text-xs text-gray-500">
+                Список публикаций пуст.
+              </div>
+            </div>
+          </div>
+
+          <!-- PAGE 4: RULES AND FAQ / ПРАВИЛА И FAQ (Скриншот 8) -->
+          <div id="pageFaq" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-bold">Правила платформы и FAQ</h2>
+              <button onclick="switchPage('profile')" class="text-xs text-gray-400 hover:text-white">← В профиль</button>
+            </div>
+
+            <div class="space-y-4">
+              <div class="bg-card p-6 rounded-2xl border border-custom space-y-2">
+                <h3 class="text-sm font-bold flex items-center gap-2 text-white">📌 Как получить галочку верификации?</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Галочка выдается активным создателям популярных кланов и продавцам через панель администратора за заслуги и качественное оформление объявлений.</p>
+              </div>
+
+              <div class="bg-card p-6 rounded-2xl border border-custom space-y-2">
+                <h3 class="text-sm font-bold flex items-center gap-2 text-white">⚖️ Правила публикации объявлений</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Запрещен спам, нецензурные выражения в заголовках, указание фейковых Telegram-контактов и реклама сторонних проектов. Нарушители могут быть заблокированы администрацией.</p>
+              </div>
+
+              <div class="bg-card p-6 rounded-2xl border border-custom space-y-2">
+                <h3 class="text-sm font-bold flex items-center gap-2 text-white">💬 Куда обращаться при проблемах?</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">Если у вас возникли вопросы по работе сайта или аккаунту, всегда можно написать в нашу официальную поддержку в Telegram: <a href="https://t.me/emsellhelpbot" target="_blank" class="text-blue-400 underline">@emsellhelpbot</a>.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAGE 5: ADMIN PANEL / АДМИН ПАНЕЛЬ -->
+          <div id="pageAdmin" class="hidden bg-card p-6 rounded-2xl border border-custom space-y-4">
+            <h2 class="text-lg font-bold text-red-400 flex items-center gap-2"><i data-lucide="shield"></i> Панель Администратора (deemiix64@gmail.com)</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-gray-300">
+                <thead class="bg-gray-900 text-gray-400 uppercase border-b border-custom">
+                  <tr>
+                    <th class="p-3">Ник</th>
+                    <th class="p-3">Почта</th>
+                    <th class="p-3">Статус</th>
+                    <th class="p-3">Галочка</th>
+                    <th class="p-3">Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersTable"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT MODAL WINDOW -->
+  <div id="chatModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+    <div class="bg-card border border-custom rounded-2xl w-full max-w-md flex flex-col h-[500px]">
       <div class="p-4 border-b border-custom flex justify-between items-center">
         <div>
-          <h3 id="chatSellerEmail" class="font-bold text-sm">Продавец</h3>
-          <span id="chatSellerStatus" class="text-xs text-gray-400">Был в сети 5 мин. назад</span>
+          <div class="font-bold text-sm" id="chatTitle">Продавец</div>
+          <div class="text-[11px] text-green-400 flex items-center gap-1" id="chatStatus"><span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span> В сети</div>
         </div>
         <button onclick="closeChat()" class="text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
       </div>
       <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3"></div>
-      <form onsubmit="sendMessage(event)" class="p-4 border-t border-custom flex gap-2">
-        <input type="text" id="chatInput" required placeholder="Напишите сообщение..." class="flex-1 px-4 py-2 rounded-lg input-custom text-sm">
-        <button type="submit" class="bg-white text-black px-4 py-2 rounded-lg font-semibold text-sm">Отправить</button>
+      <form onsubmit="sendChatMessage(event)" class="p-3 border-t border-custom flex gap-2">
+        <input type="text" id="chatInput" required placeholder="Напишите сообщение..." class="flex-1 px-4 py-2 rounded-xl input-custom text-xs">
+        <button type="submit" class="bg-white text-black px-4 py-2 rounded-xl text-xs font-bold">Отправить</button>
       </form>
     </div>
   </div>
 
   <script>
     const ADMIN_EMAIL = 'deemiix64@gmail.com';
-    let currentUser = JSON.parse(localStorage.getItem('emsell_user')) || null;
-    let pendingCode = null;
-    let pendingEmail = null;
+    let currentUser = JSON.parse(localStorage.getItem('emsell_current')) || null;
+    let pendingData = null;
     let activeFilter = 'all';
 
-    let users = JSON.parse(localStorage.getItem('emsell_users')) || [
-      { email: 'deemiix64@gmail.com', isBanned: false, hasBadge: true, lastSeen: 'В сети' },
-      { email: 'seller@gmail.com', isBanned: false, hasBadge: true, lastSeen: 'Был(а) в сети 3 мин. назад' }
+    let users = JSON.parse(localStorage.getItem('emsell_db_users')) || [
+      { username: 'deemiix64', email: 'deemiix64@gmail.com', isBanned: false, hasBadge: true, lastSeen: 'В сети' },
+      { username: 'borz', email: 'borz@gmail.com', isBanned: false, hasBadge: true, lastSeen: 'Был(а) в сети 5 мин. назад' }
     ];
 
-    let items = JSON.parse(localStorage.getItem('emsell_items')) || [
+    let items = JSON.parse(localStorage.getItem('emsell_db_items')) || [
       {
         id: 1,
-        title: 'Меч Бога Анархии 1000lvl',
-        game: 'Minecraft - Анархия',
-        desc: 'Топовый зачарованный меч. Передача сразу после оплаты.',
-        price: '250',
+        title: 'Test',
+        desc: 'Test tester',
+        game: 'Other',
+        price: '100',
         currency: '₽',
-        photo: 'https://placehold.co/400x200/1e293b/ffffff?text=Minecraft+Item',
-        seller: 'seller@gmail.com',
-        hasBadge: true
+        seller: 'borz',
+        sellerEmail: 'borz@gmail.com',
+        tg: '@durov',
+        hasBadge: true,
+        views: 0
       }
     ];
 
-    let messages = JSON.parse(localStorage.getItem('emsell_chat')) || [];
+    let chats = JSON.parse(localStorage.getItem('emsell_db_chats')) || [];
 
-    function saveState() {
-      localStorage.setItem('emsell_users', JSON.stringify(users));
-      localStorage.setItem('emsell_items', JSON.stringify(items));
-      localStorage.setItem('emsell_chat', JSON.stringify(messages));
+    function saveDB() {
+      localStorage.setItem('emsell_db_users', JSON.stringify(users));
+      localStorage.setItem('emsell_db_items', JSON.stringify(items));
+      localStorage.setItem('emsell_db_chats', JSON.stringify(chats));
     }
 
-    function playNotificationSound() {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.15);
-      } catch (e) {}
+    function showToast(msg) {
+      document.getElementById('toastMsg').innerText = msg;
+      document.getElementById('toast').classList.remove('hidden');
+      setTimeout(hideToast, 4000);
+    }
+    function hideToast() { document.getElementById('toast').classList.add('hidden'); }
+
+    function toggleAuthView(view) {
+      ['authViewRegister', 'authViewLogin', 'authViewCode'].forEach(v => document.getElementById(v).classList.add('hidden'));
+      if (view === 'register') document.getElementById('authViewRegister').classList.remove('hidden');
+      if (view === 'login') document.getElementById('authViewLogin').classList.remove('hidden');
+      if (view === 'code') document.getElementById('authViewCode').classList.remove('hidden');
     }
 
-    async function handleRequestCode(e) {
+    function handleRegisterSubmit(e) {
       e.preventDefault();
-      const email = document.getElementById('authEmail').value;
-      const user = users.find(u => u.email === email);
-      if (user && user.isBanned) return alert('Ваш аккаунт заблокирован!');
+      const user = document.getElementById('regUser').value;
+      const email = document.getElementById('regEmail').value;
+      const pass = document.getElementById('regPassword').value;
 
-      pendingCode = Math.floor(100000 + Math.random() * 900000).toString();
-      pendingEmail = email;
+      pendingData = { username: user, email, pass, code: Math.floor(100000 + Math.random() * 900000).toString() };
 
-      try {
-        const res = await fetch('/api/send-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, code: pendingCode })
-        });
-        if (res.ok) {
-          document.getElementById('authStep1').classList.add('hidden');
-          document.getElementById('authStep2').classList.remove('hidden');
-        } else {
-          alert('Ошибка отправки кода на почту');
-        }
-      } catch (err) {
-        alert('Ошибка API');
-      }
+      fetch('/api/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pendingData.email, code: pendingData.code })
+      }).catch(() => {});
+
+      toggleAuthView('code');
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const existing = users.find(u => u.email === email);
+
+      if (existing && existing.isBanned) return showToast('Ваш аккаунт заблокирован!');
+
+      pendingData = { 
+        username: document.getElementById('loginUser').value, 
+        email, 
+        code: Math.floor(100000 + Math.random() * 900000).toString() 
+      };
+
+      fetch('/api/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pendingData.email, code: pendingData.code })
+      }).catch(() => {});
+
+      toggleAuthView('code');
     }
 
     function handleVerifyCode(e) {
       e.preventDefault();
-      const code = document.getElementById('authCode').value;
-      if (code === pendingCode) {
-        let user = users.find(u => u.email === pendingEmail);
-        if (!user) {
-          user = { email: pendingEmail, isBanned: false, hasBadge: false, lastSeen: 'В сети' };
-          users.push(user);
-          saveState();
+      const codeInput = document.getElementById('codeVal').value;
+
+      if (pendingData && codeInput === pendingData.code) {
+        let u = users.find(x => x.email === pendingData.email);
+        if (!u) {
+          u = { username: pendingData.username, email: pendingData.email, isBanned: false, hasBadge: false, lastSeen: 'В сети' };
+          users.push(u);
+          saveDB();
         }
-        currentUser = user;
-        localStorage.setItem('emsell_user', JSON.stringify(currentUser));
-        initApp();
+        currentUser = u;
+        localStorage.setItem('emsell_current', JSON.stringify(currentUser));
+        renderApp();
       } else {
-        alert('Неверный код!');
+        showToast('Неверный код!');
       }
     }
 
     function logout() {
-      localStorage.removeItem('emsell_user');
+      localStorage.removeItem('emsell_current');
       currentUser = null;
-      initApp();
+      renderApp();
     }
 
-    function switchTab(tab) {
-      ['tabFeed', 'tabCreate', 'tabProfile', 'tabAdmin'].forEach(t => document.getElementById(t).classList.add('hidden'));
-      if (tab === 'feed') document.getElementById('tabFeed').classList.remove('hidden');
-      if (tab === 'create') document.getElementById('tabCreate').classList.remove('hidden');
-      if (tab === 'profile') document.getElementById('tabProfile').classList.remove('hidden');
-      if (tab === 'admin') document.getElementById('tabAdmin').classList.remove('hidden');
+    function switchPage(page) {
+      ['pageFeed', 'pageCreate', 'pageProfile', 'pageFaq', 'pageAdmin'].forEach(p => document.getElementById(p).classList.add('hidden'));
+      if (page === 'feed') document.getElementById('pageFeed').classList.remove('hidden');
+      if (page === 'create') document.getElementById('pageCreate').classList.remove('hidden');
+      if (page === 'profile') document.getElementById('pageProfile').classList.remove('hidden');
+      if (page === 'faq') document.getElementById('pageFaq').classList.remove('hidden');
+      if (page === 'admin') document.getElementById('pageAdmin').classList.remove('hidden');
     }
 
     function filterGame(game) {
       activeFilter = game;
-      switchTab('feed');
-      renderItems();
+      switchPage('feed');
+      renderFeed();
     }
 
     function toggleCustomCurrency(val) {
-      document.getElementById('customCurrencyContainer').classList.toggle('hidden', val !== 'custom');
+      document.getElementById('customCurrencyBox').classList.toggle('hidden', val !== 'custom');
     }
 
-    function handleCreateItem(e) {
+    function handleCreateSubmit(e) {
       e.preventDefault();
-      if (!currentUser) return alert('Сначала войдите в аккаунт');
-
-      const fileInput = document.getElementById('itemPhoto');
-      const currencyVal = document.getElementById('itemCurrency').value;
-      const finalCurrency = currencyVal === 'custom' ? document.getElementById('itemCustomCurrency').value : currencyVal;
+      const currencyVal = document.getElementById('createCurrency').value;
+      const finalCurrency = currencyVal === 'custom' ? document.getElementById('createCustomCurrency').value : currencyVal;
 
       const newItem = {
         id: Date.now(),
-        title: document.getElementById('itemTitle').value,
-        game: document.getElementById('itemGame').value,
-        desc: document.getElementById('itemDesc').value,
-        price: document.getElementById('itemPrice').value,
+        title: document.getElementById('createTitle').value,
+        desc: document.getElementById('createDesc').value,
+        game: document.getElementById('createGame').value,
+        price: document.getElementById('createPrice').value,
         currency: finalCurrency || '₽',
-        photo: 'https://placehold.co/400x200/1e293b/ffffff?text=Item',
-        seller: currentUser.email,
-        hasBadge: currentUser.hasBadge
+        seller: currentUser.username,
+        sellerEmail: currentUser.email,
+        tg: document.getElementById('createTg').value,
+        hasBadge: currentUser.hasBadge,
+        views: 0
       };
 
+      const fileInput = document.getElementById('createPhoto');
       if (fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function(evt) {
           newItem.photo = evt.target.result;
           items.unshift(newItem);
-          saveState();
-          switchTab('feed');
-          renderItems();
+          saveDB();
+          switchPage('feed');
+          renderFeed();
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
         items.unshift(newItem);
-        saveState();
-        switchTab('feed');
-        renderItems();
+        saveDB();
+        switchPage('feed');
+        renderFeed();
       }
     }
 
-    function renderItems() {
+    function renderFeed() {
       const search = document.getElementById('searchInput').value.toLowerCase();
-      const container = document.getElementById('itemsContainer');
+      const container = document.getElementById('feedList');
       container.innerHTML = '';
 
       items
@@ -382,137 +551,166 @@
         .filter(i => i.title.toLowerCase().includes(search) || i.desc.toLowerCase().includes(search))
         .forEach(item => {
           container.innerHTML += `
-            <div class="bg-card border border-custom rounded-xl p-4 flex flex-col justify-between gap-3">
-              ${item.photo ? `<img src="${item.photo}" class="w-full h-36 object-cover rounded-lg">` : ''}
-              <div>
-                <span class="text-[10px] font-bold uppercase bg-gray-800 text-gray-400 px-2 py-0.5 rounded">${item.game}</span>
-                <h3 class="font-bold text-base mt-2">${item.title}</h3>
-                <p class="text-xs text-gray-400 mt-1 line-clamp-2">${item.desc}</p>
-              </div>
-              <div class="flex items-center justify-between border-t border-custom pt-3 mt-2">
+            <div class="bg-card border border-custom rounded-2xl p-5 space-y-3">
+              <div class="flex items-start justify-between">
                 <div>
-                  <span class="text-lg font-bold">${item.price} ${item.currency}</span>
-                  <div class="text-[11px] text-gray-400 flex items-center gap-1">
-                    ${item.seller} ${item.hasBadge ? '<span class="text-blue-400 font-bold">✓</span>' : ''}
-                  </div>
+                  <h4 class="font-bold text-base text-white">${item.title}</h4>
+                  <p class="text-xs text-gray-400 mt-1">${item.desc}</p>
                 </div>
-                <button onclick="openChat('${item.seller}')" class="bg-white text-black text-xs font-bold px-3 py-2 rounded-lg hover:bg-gray-200">Написать</button>
+                <span class="text-[10px] font-bold text-gray-400 bg-gray-800/80 px-2.5 py-1 rounded-md border border-gray-700/50">${item.game}</span>
+              </div>
+              ${item.photo ? `<img src="${item.photo}" class="w-full h-48 object-cover rounded-xl border border-custom">` : ''}
+              <div class="flex items-center justify-between pt-2 border-t border-custom/60">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-300">${item.seller}</span>
+                  ${item.hasBadge ? '<span class="text-blue-400 text-xs font-bold">✓</span>' : ''}
+                  <span class="text-[10px] text-gray-500 flex items-center gap-1 ml-2"><i data-lucide="eye" class="w-3 h-3"></i> ${item.views}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-bold text-white mr-2">${item.price} ${item.currency}</span>
+                  <a href="https://t.me/${item.tg.replace('@','')}" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-1.5 rounded-lg text-gray-300 font-semibold">${item.tg}</a>
+                  <button onclick="openChat('${item.sellerEmail}')" class="bg-white text-black hover:bg-gray-200 text-xs px-3 py-1.5 rounded-lg font-bold">Чат</button>
+                </div>
               </div>
             </div>
           `;
         });
+      lucide.createIcons();
     }
 
-    function renderAdmin() {
-      const tbody = document.getElementById('adminUserTable');
+    function renderAdminTable() {
+      const tbody = document.getElementById('adminUsersTable');
       tbody.innerHTML = '';
       users.forEach(u => {
         tbody.innerHTML += `
           <tr class="border-b border-custom">
-            <td class="p-3">${u.email}</td>
+            <td class="p-3 font-semibold">${u.username}</td>
+            <td class="p-3 text-gray-400">${u.email}</td>
             <td class="p-3">${u.isBanned ? '<span class="text-red-400 font-bold">Забанен</span>' : '<span class="text-green-400">Активен</span>'}</td>
-            <td class="p-3">${u.hasBadge ? '<span class="text-blue-400 font-bold">Есть (✓)</span>' : 'Нет'}</td>
+            <td class="p-3">${u.hasBadge ? '<span class="text-blue-400 font-bold">Да (✓)</span>' : 'Нет'}</td>
             <td class="p-3 flex gap-2">
-              <button onclick="toggleBan('${u.email}')" class="px-2 py-1 rounded bg-gray-800 text-xs hover:bg-gray-700">${u.isBanned ? 'Разбанить' : 'Забанить'}</button>
-              <button onclick="toggleBadge('${u.email}')" class="px-2 py-1 rounded bg-blue-600/20 text-blue-400 text-xs hover:bg-blue-600/30">Галочка</button>
+              <button onclick="adminToggleBan('${u.email}')" class="px-2.5 py-1 rounded-lg bg-gray-800 hover:bg-gray-700 text-[11px]">${u.isBanned ? 'Разбанить' : 'Забанить'}</button>
+              <button onclick="adminToggleBadge('${u.email}')" class="px-2.5 py-1 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 text-[11px]">Галочка</button>
             </td>
           </tr>
         `;
       });
     }
 
-    function toggleBan(email) {
+    function adminToggleBan(email) {
       const u = users.find(x => x.email === email);
       if (u) u.isBanned = !u.isBanned;
-      saveState();
-      renderAdmin();
+      saveDB();
+      renderAdminTable();
     }
 
-    function toggleBadge(email) {
+    function adminToggleBadge(email) {
       const u = users.find(x => x.email === email);
       if (u) {
         u.hasBadge = !u.hasBadge;
-        items.forEach(i => { if (i.seller === email) i.hasBadge = u.hasBadge; });
+        items.forEach(i => { if (i.sellerEmail === email) i.hasBadge = u.hasBadge; });
       }
-      saveState();
-      renderAdmin();
-      renderItems();
+      saveDB();
+      renderAdminTable();
+      renderFeed();
     }
 
-    let activeChatSeller = null;
-    function openChat(sellerEmail) {
-      if (!currentUser) return alert('Войдите для чата');
-      activeChatSeller = sellerEmail;
-      const seller = users.find(u => u.email === sellerEmail) || { lastSeen: 'Не сети' };
-      document.getElementById('chatSellerEmail').innerText = sellerEmail;
-      document.getElementById('chatSellerStatus').innerText = seller.lastSeen;
+    let activeChatPartner = null;
+    function openChat(email) {
+      activeChatPartner = email;
+      const partner = users.find(u => u.email === email) || { username: email, lastSeen: 'Был(а) в сети недавнo' };
+      document.getElementById('chatTitle').innerText = partner.username;
+      document.getElementById('chatStatus').innerHTML = `<span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span> ${partner.lastSeen}`;
       document.getElementById('chatModal').classList.remove('hidden');
-      renderMessages();
+      renderChatMessages();
     }
 
     function closeChat() { document.getElementById('chatModal').classList.add('hidden'); }
 
-    function sendMessage(e) {
+    function sendChatMessage(e) {
       e.preventDefault();
       const input = document.getElementById('chatInput');
-      messages.push({
+      chats.push({
         from: currentUser.email,
-        to: activeChatSeller,
+        to: activeChatPartner,
         text: input.value,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       input.value = '';
-      saveState();
-      playNotificationSound();
-      renderMessages();
+      saveDB();
+      playAudioNotification();
+      renderChatMessages();
     }
 
-    function renderMessages() {
+    function playAudioNotification() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.12);
+      } catch (e) {}
+    }
+
+    function renderChatMessages() {
       const box = document.getElementById('chatMessages');
       box.innerHTML = '';
-      messages
-        .filter(m => (m.from === currentUser.email && m.to === activeChatSeller) || (m.from === activeChatSeller && m.to === currentUser.email))
-        .forEach(m => {
-          const isMe = m.from === currentUser.email;
+      chats
+        .filter(c => (c.from === currentUser.email && c.to === activeChatPartner) || (c.from === activeChatPartner && c.to === currentUser.email))
+        .forEach(c => {
+          const isMe = c.from === currentUser.email;
           box.innerHTML += `
             <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-              <div class="max-w-[80%] px-3 py-2 rounded-xl text-xs ${isMe ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-200'}">
-                ${m.text}
+              <div class="max-w-[80%] px-3.5 py-2 rounded-2xl text-xs ${isMe ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-200'}">
+                ${c.text}
               </div>
-              <span class="text-[9px] text-gray-500 mt-0.5">${m.time}</span>
+              <span class="text-[9px] text-gray-500 mt-1">${c.time}</span>
             </div>
           `;
         });
       box.scrollTop = box.scrollHeight;
     }
 
-    function initApp() {
+    function renderApp() {
       if (currentUser) {
-        document.getElementById('authSection').classList.add('hidden');
-        document.getElementById('userHeaderBlock').innerHTML = `
-          <span class="text-xs text-gray-300">${currentUser.email} ${currentUser.hasBadge ? '<span class="text-blue-400">✓</span>' : ''}</span>
+        document.getElementById('screenAuth').classList.add('hidden');
+        document.getElementById('screenMain').classList.remove('hidden');
+
+        document.getElementById('headerUserInfo').innerHTML = `
+          <span>${currentUser.username}</span>
+          ${currentUser.hasBadge ? '<span class="text-blue-400 font-bold">✓</span>' : ''}
         `;
-        document.getElementById('profileEmail').innerText = currentUser.email;
-        document.getElementById('profileAvatar').innerText = currentUser.email[0].toUpperCase();
-        document.getElementById('profileBadge').classList.toggle('hidden', !currentUser.hasBadge);
+
+        document.getElementById('profUser').innerText = currentUser.username;
+        document.getElementById('profEmail').innerText = currentUser.email;
+        document.getElementById('profAvatar').innerText = currentUser.username[0].toUpperCase();
+        document.getElementById('profBadge').classList.toggle('hidden', !currentUser.hasBadge);
+
+        const myItems = items.filter(i => i.sellerEmail === currentUser.email);
+        document.getElementById('statCount').innerText = myItems.length;
 
         if (currentUser.email === ADMIN_EMAIL) {
-          document.getElementById('adminTabBtn').classList.remove('hidden');
-          renderAdmin();
+          document.getElementById('navAdminBtn').classList.remove('hidden');
+          renderAdminTable();
         } else {
-          document.getElementById('adminTabBtn').classList.add('hidden');
+          document.getElementById('navAdminBtn').classList.add('hidden');
         }
-        switchTab('feed');
-        renderItems();
+
+        switchPage('feed');
+        renderFeed();
       } else {
-        document.getElementById('authSection').classList.remove('hidden');
-        document.getElementById('userHeaderBlock').innerHTML = '';
-        ['tabFeed', 'tabCreate', 'tabProfile', 'tabAdmin'].forEach(t => document.getElementById(t).classList.add('hidden'));
+        document.getElementById('screenAuth').classList.remove('hidden');
+        document.getElementById('screenMain').classList.add('hidden');
+        toggleAuthView('register');
       }
       lucide.createIcons();
     }
 
-    initApp();
+    renderApp();
   </script>
 </body>
 </html>
