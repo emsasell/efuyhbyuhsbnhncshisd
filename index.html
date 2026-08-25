@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMSELL — Маркетплейс игровых товаров</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0c0e; color: #f3f4f6; }
+        .glass-card { background: #131418; border: 1px solid rgba(255, 255, 255, 0.07); }
+        .glass-input { background: #1a1b20; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-input:focus { border-color: #3b82f6; outline: none; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- УВЕДОМЛЕНИЯ / ОШИБКИ -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- АВТОРИЗАЦИЯ / РЕГИСТРАЦИЯ -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 overflow-hidden shadow-2xl">
+            <!-- Левая колонка -->
+            <div class="p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-white/10 bg-[#101114]">
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <img src="logo.jpg" id="site-logo" alt="EMSELL Logo" class="w-12 h-12 rounded-xl object-cover border border-white/20">
+                        <span class="text-2xl font-bold tracking-wider">EMSELL</span>
+                    </div>
+                    <h1 class="text-2xl font-bold mb-3">EMSELL — твой путь к топовым вещам</h1>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        Покупай и продавай предметы, валюту, аккаунты и услуги в Minecraft, Roblox и других играх без риска. Удобный сервис и безопасность сделок.
+                    </p>
+                </div>
+                <a href="https://t.me/emsasell" target="_blank" class="flex items-center justify-center gap-2 bg-[#1c222d] text-blue-400 border border-blue-500/20 py-3 px-4 rounded-xl hover:bg-blue-500/10 transition-all font-medium text-sm">
+                    <i data-lucide="send" class="w-4 h-4"></i> Наш Telegram канал
+                </a>
+            </div>
+
+            <!-- Правая колонка: Формы -->
+            <div class="p-8 flex flex-col justify-center">
+                <!-- Шаг 1: Логин / Пароль -->
+                <form id="form-credentials" onsubmit="handleCredentialsSubmit(event)" class="space-y-4">
+                    <h2 class="text-xl font-bold mb-4" id="auth-title">Вход в аккаунт</h2>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Почта</label>
+                        <input type="email" id="auth-email" required placeholder="name@domain.com" class="w-full glass-input px-4 py-3 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Пароль</label>
+                        <input type="password" id="auth-password" required placeholder="••••••••" class="w-full glass-input px-4 py-3 rounded-xl text-sm">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-200 transition-all shadow-lg mt-2">
+                        Продолжить
+                    </button>
+                </form>
+
+                <!-- Шаг 2: Ввод 6-значного кода -->
+                <form id="form-code" onsubmit="handleCodeSubmit(event)" class="space-y-4 hidden fade-in">
+                    <h2 class="text-xl font-bold mb-2">Подтверждение почты</h2>
+                    <p class="text-xs text-gray-400 mb-4">Мы отправили 6-значный код подтверждения на вашу почту. Введите его ниже:</p>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Код подтверждения</label>
+                        <input type="text" id="auth-code" maxlength="6" required placeholder="000000" class="w-full glass-input px-4 py-3 rounded-xl text-sm text-center tracking-widest text-lg font-mono">
+                    </div>
+                    <button type="submit" class="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-200 transition-all shadow-lg">
+                        Подтвердить и войти
+                    </button>
+                    <button type="button" onclick="backToCredentials()" class="w-full text-xs text-gray-500 hover:text-gray-300 transition-all text-center">
+                        Назад
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ГЛАВНЫЙ ИНТЕРФЕЙС (ПАНЕЛЬ) -->
+    <div id="main-app" class="hidden flex-col min-h-screen">
+        <!-- Шапка -->
+        <header class="glass-card border-x-0 border-t-0 px-6 py-4 flex items-center justify-between sticky top-0 z-40 bg-[#0b0c0e]/90 backdrop-blur-md">
+            <div class="flex items-center gap-3">
+                <img src="logo.jpg" class="w-8 h-8 rounded-lg object-cover">
+                <span class="font-bold tracking-wider text-lg">EMSELL</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="openChatModal()" class="relative p-2 rounded-xl glass-input hover:bg-white/5 transition-all">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                    <span id="chat-badge" class="hidden absolute -top-1 -right-1 bg-blue-500 w-3 h-3 rounded-full"></span>
+                </button>
+                <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('profile')">
+                    <div id="nav-avatar" class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm">U</div>
+                    <span id="nav-username" class="text-sm font-medium">Пользователь</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Боковая навигация -->
+            <aside class="space-y-6">
+                <div class="glass-card p-4 rounded-2xl space-y-2">
+                    <div class="text-xs text-gray-500 font-semibold px-3 mb-2">НАВИГАЦИЯ</div>
+                    <button onclick="switchTab('feed')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium transition-all text-left">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i> Лента объявлений
+                    </button>
+                    <button onclick="switchTab('create')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium transition-all text-left">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Создать объявление
+                    </button>
+                    <button onclick="switchTab('profile')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-sm font-medium transition-all text-left">
+                        <i data-lucide="user" class="w-4 h-4"></i> Профиль
+                    </button>
+                    <button id="admin-tab-btn" onclick="switchTab('admin')" class="hidden w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-sm font-medium transition-all text-left">
+                        <i data-lucide="shield-alert" class="w-4 h-4"></i> Админ панель
+                    </button>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl space-y-2">
+                    <div class="text-xs text-gray-500 font-semibold px-3 mb-2">ИГРЫ И ПЛЕЙСЫ</div>
+                    <button onclick="filterByGame('all')" class="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/5 text-sm transition-all text-left">
+                        <span>Все игры</span> <i data-lucide="gamepad-2" class="w-4 h-4 text-purple-400"></i>
+                    </button>
+                    <div class="text-xs text-gray-400 font-medium px-3 pt-2">Roblox</div>
+                    <button onclick="filterByGame('Adopt Me')" class="w-full text-left px-5 py-1.5 text-xs text-gray-400 hover:text-white transition-all">• Adopt Me</button>
+                    <button onclick="filterByGame('Blox Fruits')" class="w-full text-left px-5 py-1.5 text-xs text-gray-400 hover:text-white transition-all">• Blox Fruits</button>
+                    <button onclick="filterByGame('MM2')" class="w-full text-left px-5 py-1.5 text-xs text-gray-400 hover:text-white transition-all">• MM2</button>
+                    <button onclick="filterByGame('Brookhaven')" class="w-full text-left px-5 py-1.5 text-xs text-gray-400 hover:text-white transition-all">• Brookhaven</button>
+                    
+                    <div class="text-xs text-gray-400 font-medium px-3 pt-2">Minecraft</div>
+                    <button onclick="filterByGame('Hypixel')" class="w-full text-left px-5 py-1.5 text-xs text-gray-400 hover:text-white transition-all">• Сервер Hypixel</button>
+                    <button onclick="filterByGame('Анархия')" class="w-full text-left px-5 py-1.5 text-xs text-gray-400 hover:text-white transition-all">• Сервера Анархии</button>
+                </div>
+            </aside>
+
+            <!-- Основной контент -->
+            <main class="lg:col-span-3">
+                <!-- Вкладка: Лента -->
+                <section id="tab-feed" class="space-y-4">
+                    <div class="glass-card p-3 rounded-2xl flex items-center gap-3">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-400 ml-2"></i>
+                        <input type="text" id="search-input" oninput="renderProducts()" placeholder="Поиск товаров и услуг..." class="bg-transparent w-full text-sm outline-none">
+                    </div>
+                    <div id="products-list" class="space-y-3">
+                        <!-- Карточки товаров -->
+                    </div>
+                </section>
+
+                <!-- Вкладка: Создать объявление -->
+                <section id="tab-create" class="hidden fade-in">
+                    <div class="glass-card p-6 rounded-2xl space-y-4">
+                        <h2 class="text-xl font-bold mb-4">Новое объявление</h2>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Категория (игра / режим / сервер)</label>
+                            <input type="text" id="p-category" placeholder="Например: Roblox (MM2) или Minecraft" class="w-full glass-input px-4 py-3 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Заголовок</label>
+                            <input type="text" id="p-title" placeholder="Например: Меч Godly в MM2" class="w-full glass-input px-4 py-3 rounded-xl text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Цена</label>
+                                <input type="number" id="p-price" placeholder="100" class="w-full glass-input px-4 py-3 rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">Валюта</label>
+                                <select id="p-currency" onchange="handleCurrencyChange(this)" class="w-full glass-input px-4 py-3 rounded-xl text-sm bg-[#1a1b20]">
+                                    <option value="₽">Рубли (₽)</option>
+                                    <option value="₴">Гривны (₴)</option>
+                                    <option value="$">Доллары ($)</option>
+                                    <option value="custom">+ Своя валюта</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="custom-currency-box" class="hidden">
+                            <label class="block text-xs text-gray-400 mb-1">Укажите свою валюту</label>
+                            <input type="text" id="p-custom-currency" placeholder="Например: EUR, Robux, Тг звезды" class="w-full glass-input px-4 py-3 rounded-xl text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Описание товара</label>
+                            <textarea id="p-desc" rows="4" placeholder="Укажите характеристики товара..." class="w-full glass-input px-4 py-3 rounded-xl text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Фото товара (Загрузка)</label>
+                            <input type="file" id="p-file" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-white/10 file:text-white hover:file:bg-white/20">
+                        </div>
+                        <button onclick="createProduct()" class="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-200 transition-all mt-4">
+                            Опубликовать объявление
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Вкладка: Профиль -->
+                <section id="tab-profile" class="hidden fade-in space-y-6">
+                    <div class="glass-card p-6 rounded-2xl flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div id="prof-avatar" class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-2xl">U</div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 id="prof-email" class="text-lg font-bold">user@mail.com</h2>
+                                    <span id="prof-badge" class="hidden text-blue-400"><i data-lucide="check-circle-2" class="w-5 h-5 fill-blue-500/20"></i></span>
+                                </div>
+                                <span id="prof-status" class="text-xs text-green-400">● В сети</span>
+                            </div>
+                        </div>
+                        <button onclick="logout()" class="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 text-sm transition-all">Выйти</button>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl space-y-3">
+                        <h3 class="font-bold text-sm mb-2">Настройки и Поддержка</h3>
+                        <a href="https://t.me/emsellhelpbot" target="_blank" class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all text-sm">
+                            <span class="flex items-center gap-2"><i data-lucide="bot" class="w-4 h-4 text-blue-400"></i> Поддержка в Telegram</span>
+                            <span class="text-xs text-gray-400">@emsellhelpbot</span>
+                        </a>
+                        <a href="https://t.me/emsasell" target="_blank" class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all text-sm">
+                            <span class="flex items-center gap-2"><i data-lucide="send" class="w-4 h-4 text-blue-400"></i> Официальный канал</span>
+                            <span class="text-xs text-gray-400">t.me/emsasell</span>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Вкладка: Админ панель -->
+                <section id="tab-admin" class="hidden fade-in space-y-4">
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-red-400">
+                            <i data-lucide="shield" class="w-5 h-5"></i> Панель администратора
+                        </h2>
+                        <div class="space-y-3" id="admin-users-list">
+                            <!-- Список пользователей -->
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ЧАТА -->
+    <div id="chat-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-2xl flex flex-col h-[500px] overflow-hidden">
+            <div class="p-4 border-b border-white/10 flex items-center justify-between bg-[#101114]">
+                <div>
+                    <h3 id="chat-target-user" class="font-bold text-sm">Чат с продавцом</h3>
+                    <p id="chat-seller-status" class="text-xs text-gray-400">Был в сети 5 мин. назад</p>
+                </div>
+                <button onclick="closeChatModal()" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3">
+                <!-- Сообщения -->
+            </div>
+            <div class="p-3 border-t border-white/10 flex gap-2 bg-[#101114]">
+                <input type="text" id="chat-input" placeholder="Напишите сообщение..." class="flex-1 glass-input px-4 py-2 rounded-xl text-sm outline-none">
+                <button onclick="sendMessage()" class="bg-white text-black p-2 rounded-xl hover:bg-gray-200 transition-all"><i data-lucide="send" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ИНИЦИАЛИЗАЦИЯ И ДАННЫЕ
+        lucide.createIcons();
+        
+        const ADMIN_EMAIL = "deemiix64@gmail.com";
+        const SENDER_EMAIL = "emsamsell@gmail.com";
+        let generatedCode = null;
+        let pendingUser = null;
+        let currentUser = JSON.parse(localStorage.getItem('emsell_user')) || null;
+        let activeFilter = 'all';
+
+        // Инициализация базы данных в localStorage
+        let users = JSON.parse(localStorage.getItem('emsell_db_users')) || [
+            { email: "deemiix64@gmail.com", isVerified: true, isBanned: false, lastSeen: "В сети" },
+            { email: "seller@emsell.com", isVerified: true, isBanned: false, lastSeen: "Был в сети 10 мин. назад" }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('emsell_db_products')) || [
+            { id: 1, title: "Набор предметов Adopt Me", category: "Adopt Me", price: "500", currency: "₽", desc: "Редкие питомцы в наличии.", seller: "seller@emsell.com", image: "https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=400" }
+        ];
+
+        let chatMessages = JSON.parse(localStorage.getItem('emsell_db_chats')) || [];
+
+        // Восстановление сессии
+        if (currentUser) {
+            initApp();
+        }
+
+        function showToast(message, isError = true) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl text-sm font-medium flex items-center justify-between gap-4 border fade-in shadow-xl ${isError ? 'bg-red-950/80 border-red-500/50 text-red-200' : 'bg-green-950/80 border-green-500/50 text-green-200'}`;
+            toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()"><i data-lucide="x" class="w-4 h-4"></i></button>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Вход / Код
+        function handleCredentialsSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+
+            // Проверка бана
+            const userInDb = users.find(u => u.email === email);
+            if (userInDb && userInDb.isBanned) {
+                showToast("Ваш аккаунт заблокирован администратором!");
+                return;
+            }
+
+            pendingUser = { email, password };
+            generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // Имитация отправки реального кода на почту через консоль/EmailJS
+            console.log(`[EMSELL MAIL SYSTEM] Код для ${email}: ${generatedCode}`);
+            showToast(`Код отправлен на почту! (Для тестов: ${generatedCode})`, false);
+
+            document.getElementById('form-credentials').classList.add('hidden');
+            document.getElementById('form-code').classList.remove('hidden');
+        }
+
+        function handleCodeSubmit(e) {
+            e.preventDefault();
+            const inputCode = document.getElementById('auth-code').value.trim();
+
+            if (inputCode !== generatedCode) {
+                showToast("Неверный код!");
+                return;
+            }
+
+            // Успешный вход
+            let user = users.find(u => u.email === pendingUser.email);
+            if (!user) {
+                user = { email: pendingUser.email, isVerified: false, isBanned: false, lastSeen: "В сети" };
+                users.push(user);
+                saveUsers();
+            }
+
+            currentUser = user;
+            localStorage.setItem('emsell_user', JSON.stringify(currentUser));
+            initApp();
+        }
+
+        function backToCredentials() {
+            document.getElementById('form-code').classList.add('hidden');
+            document.getElementById('form-credentials').classList.remove('hidden');
+        }
+
+        function initApp() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('flex');
+
+            document.getElementById('nav-username').innerText = currentUser.email.split('@')[0];
+            document.getElementById('nav-avatar').innerText = currentUser.email[0].toUpperCase();
+            document.getElementById('prof-email').innerText = currentUser.email;
+            document.getElementById('prof-avatar').innerText = currentUser.email[0].toUpperCase();
+
+            if (currentUser.email === ADMIN_EMAIL) {
+                document.getElementById('admin-tab-btn').classList.remove('hidden');
+            }
+
+            if (currentUser.isVerified) {
+                document.getElementById('prof-badge').classList.remove('hidden');
+            }
+
+            renderProducts();
+            renderAdminUsers();
+        }
+
+        function logout() {
+            localStorage.removeItem('emsell_user');
+            location.reload();
+        }
+
+        // Вкладки
+        function switchTab(tabName) {
+            ['feed', 'create', 'profile', 'admin'].forEach(tab => {
+                const el = document.getElementById(`tab-${tab}`);
+                if (el) el.classList.add('hidden');
+            });
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        }
+
+        // Товары и Валюты
+        function handleCurrencyChange(select) {
+            const customBox = document.getElementById('custom-currency-box');
+            if (select.value === 'custom') {
+                customBox.classList.remove('hidden');
+            } else {
+                customBox.classList.add('hidden');
+            }
+        }
+
+        function createProduct() {
+            const category = document.getElementById('p-category').value.trim();
+            const title = document.getElementById('p-title').value.trim();
+            const price = document.getElementById('p-price').value.trim();
+            let currency = document.getElementById('p-currency').value;
+            const desc = document.getElementById('p-desc').value.trim();
+            const fileInput = document.getElementById('p-file');
+
+            if (currency === 'custom') {
+                currency = document.getElementById('p-custom-currency').value.trim() || 'ед.';
+            }
+
+            if (!category || !title || !price) {
+                showToast("Заполните обязательные поля!");
+                return;
+            }
+
+            const processProduct = (imageData) => {
+                const newProduct = {
+                    id: Date.now(),
+                    category,
+                    title,
+                    price,
+                    currency,
+                    desc,
+                    seller: currentUser.email,
+                    image: imageData || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400'
+                };
+                products.unshift(newProduct);
+                localStorage.setItem('emsell_db_products', JSON.stringify(products));
+                showToast("Объявление создано!", false);
+                switchTab('feed');
+                renderProducts();
+            };
+
+            if (fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => processProduct(e.target.result);
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                processProduct(null);
+            }
+        }
+
+        function renderProducts() {
+            const list = document.getElementById('products-list');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            list.innerHTML = '';
+
+            const filtered = products.filter(p => {
+                const matchSearch = p.title.toLowerCase().includes(search) || p.category.toLowerCase().includes(search);
+                const matchGame = activeFilter === 'all' || p.category.toLowerCase().includes(activeFilter.toLowerCase());
+                return matchSearch && matchGame;
+            });
+
+            filtered.forEach(p => {
+                const sellerObj = users.find(u => u.email === p.seller) || { isVerified: false };
+                const item = document.createElement('div');
+                item.className = 'glass-card p-4 rounded-2xl flex gap-4 items-center fade-in hover:border-white/20 transition-all';
+                item.innerHTML = `
+                    <img src="${p.image}" class="w-20 h-20 rounded-xl object-cover bg-white/5">
+                    <div class="flex-1">
+                        <span class="text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-lg border border-blue-500/20">${p.category}</span>
+                        <h4 class="font-bold text-sm mt-1">${p.title}</h4>
+                        <p class="text-xs text-gray-400 line-clamp-1 mt-0.5">${p.desc}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="text-xs text-gray-400">${p.seller}</span>
+                            ${sellerObj.isVerified ? '<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-blue-400"></i>' : ''}
+                        </div>
+                    </div>
+                    <div class="text-right flex flex-col justify-between h-20">
+                        <span class="text-lg font-bold text-white">${p.price} ${p.currency}</span>
+                        <button onclick="openChatWith('${p.seller}')" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs rounded-xl transition-all flex items-center gap-1">
+                            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Написать
+                        </button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function filterByGame(game) {
+            activeFilter = game;
+            renderProducts();
+        }
+
+        // Чат и Звуковое уведомление
+        let activeChatTarget = null;
+
+        function playSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch(e){}
+        }
+
+        function openChatWith(email) {
+            activeChatTarget = email;
+            const targetUser = users.find(u => u.email === email);
+            document.getElementById('chat-target-user').innerText = email;
+            document.getElementById('chat-seller-status').innerText = targetUser ? targetUser.lastSeen : 'Офлайн';
+            document.getElementById('chat-modal').classList.remove('hidden');
+            renderMessages();
+        }
+
+        function openChatModal() {
+            if (!activeChatTarget && users.length > 0) {
+                openChatWith(users[0].email);
+            } else {
+                document.getElementById('chat-modal').classList.remove('hidden');
+            }
+        }
+
+        function closeChatModal() {
+            document.getElementById('chat-modal').classList.add('hidden');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !activeChatTarget) return;
+
+            const msg = {
+                id: Date.now(),
+                from: currentUser.email,
+                to: activeChatTarget,
+                text
+            };
+
+            chatMessages.push(msg);
+            localStorage.setItem('emsell_db_chats', JSON.stringify(chatMessages));
+            input.value = '';
+            renderMessages();
+            playSound();
+        }
+
+        function renderMessages() {
+            const box = document.getElementById('chat-messages');
+            box.innerHTML = '';
+
+            const msgs = chatMessages.filter(m => 
+                (m.from === currentUser.email && m.to === activeChatTarget) ||
+                (m.from === activeChatTarget && m.to === currentUser.email)
+            );
+
+            msgs.forEach(m => {
+                const isMe = m.from === currentUser.email;
+                const div = document.createElement('div');
+                div.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+                div.innerHTML = `
+                    <div class="max-w-[75%] p-3 rounded-2xl text-xs ${isMe ? 'bg-blue-600 text-white rounded-br-none' : 'glass-input text-gray-200 rounded-bl-none'}">
+                        ${m.text}
+                    </div>
+                `;
+                box.appendChild(div);
+            });
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // Админ панель
+        function renderAdminUsers() {
+            const list = document.getElementById('admin-users-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            users.forEach(u => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 text-sm';
+                item.innerHTML = `
+                    <div>
+                        <span class="font-medium">${u.email}</span>
+                        ${u.isVerified ? '<span class="ml-2 text-xs text-blue-400">✓ Галочка</span>' : ''}
+                        ${u.isBanned ? '<span class="ml-2 text-xs text-red-400">[Забанен]</span>' : ''}
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="toggleVerify('${u.email}')" class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs hover:bg-blue-500/30">
+                            ${u.isVerified ? 'Снять галочку' : 'Дать галочку'}
+                        </button>
+                        <button onclick="toggleBan('${u.email}')" class="px-3 py-1 bg-red-500/20 text-red-400 rounded-lg text-xs hover:bg-red-500/30">
+                            ${u.isBanned ? 'Разбанить' : 'Забанить'}
+                        </button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function toggleVerify(email) {
+            const user = users.find(u => u.email === email);
+            if (user) {
+                user.isVerified = !user.isVerified;
+                saveUsers();
+                renderAdminUsers();
+                renderProducts();
+            }
+        }
+
+        function toggleBan(email) {
+            const user = users.find(u => u.email === email);
+            if (user) {
+                user.isBanned = !user.isBanned;
+                saveUsers();
+                renderAdminUsers();
+            }
+        }
+
+        function saveUsers() {
+            localStorage.setItem('emsell_db_users', JSON.stringify(users));
+        }
+    </script>
+</body>
+</html>
