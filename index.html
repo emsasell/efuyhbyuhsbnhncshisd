@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- EmailJS SDK для отправки кодов на почту -->
+    <!-- EmailJS SDK для отправки кодов авторизации -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <style>
@@ -68,15 +68,14 @@
         /* 3D Каскадная анимация появления товаров */
         .product-card {
             opacity: 0;
-            transform: translateY(45px) scale(0.94) rotateX(-8deg);
-            transform-origin: top center;
-            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(35px) scale(0.96);
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             will-change: opacity, transform;
         }
 
         .product-card.reveal {
             opacity: 1;
-            transform: translateY(0) scale(1) rotateX(0deg);
+            transform: translateY(0) scale(1);
         }
 
         /* Базовые анимации */
@@ -173,7 +172,7 @@
             <h2 class="text-xl font-bold text-white mb-1 flex items-center gap-2">
                 <i data-lucide="plus-circle" class="w-5 h-5 text-blue-500"></i> Разместить товар
             </h2>
-            <p class="text-xs text-gray-400 mb-5">Товар появится в вашей базе данных SQLite на Termux</p>
+            <p class="text-xs text-gray-400 mb-5">Заполните информацию о вашем предмете или услуге</p>
 
             <form id="form-create-product" onsubmit="handleCreateProduct(event)" class="space-y-4">
                 <div>
@@ -200,18 +199,48 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Ссылка на изображение</label>
-                    <input type="text" id="new-prod-image" placeholder="img.jpg или URL картинки" value="img.jpg" class="w-full glass-input px-4 py-2.5 rounded-xl text-sm">
-                </div>
-
-                <div>
                     <label class="block text-xs text-gray-400 mb-1">Описание товара</label>
-                    <textarea id="new-prod-desc" rows="3" placeholder="Укажите подробности, условия передачи или характристики предмета..." class="w-full glass-input px-4 py-2.5 rounded-xl text-sm resize-none"></textarea>
+                    <textarea id="new-prod-desc" rows="4" placeholder="Укажите подробности, условия передачи или характеристики предмета..." class="w-full glass-input px-4 py-2.5 rounded-xl text-sm resize-none"></textarea>
                 </div>
 
                 <div class="pt-2 flex gap-3">
                     <button type="button" onclick="closeAddProductModal()" class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-gray-300 font-semibold rounded-xl text-sm">Отмена</button>
                     <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm shadow-lg shadow-blue-600/30">Опубликовать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ПРОФИЛЬ И ОПИСАНИЕ ПОЛЬЗОВАТЕЛЯ (BIO) -->
+    <div id="modal-profile" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 fade-in">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-6 relative border border-white/10 shadow-2xl">
+            <button onclick="closeProfileModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xl hover:bg-white/5">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center">
+                    <i data-lucide="user" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h2 id="profile-modal-username" class="text-lg font-bold text-white">@username</h2>
+                    <p id="profile-modal-email" class="text-xs text-gray-400">user@example.com</p>
+                </div>
+            </div>
+
+            <form onsubmit="handleSaveProfileBio(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Описание профиля (О себе)</label>
+                    <textarea id="profile-bio-input" rows="4" placeholder="Напишите пару слов о себе, вашем времени онлайн или условиях сделок..." class="w-full glass-input px-4 py-2.5 rounded-xl text-sm resize-none"></textarea>
+                </div>
+
+                <div class="flex flex-col gap-2 pt-2">
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm shadow-lg shadow-blue-600/30">
+                        Сохранить описание
+                    </button>
+                    <button type="button" onclick="handleLogout()" class="w-full py-2.5 bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-500/20 font-medium rounded-xl text-xs transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Выйти из аккаунта
+                    </button>
                 </div>
             </form>
         </div>
@@ -224,8 +253,10 @@
             <!-- Левая информационная панель -->
             <div class="p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-white/10 bg-gradient-to-br from-[#101117] via-[#0d0e13] to-[#08090b]">
                 <div>
-                    <div class="flex items-center gap-3 mb-8 hover:scale-105 transition-transform duration-300 cursor-pointer">
-                        <img src="img.jpg" alt="EMSELL Logo" class="w-12 h-12 rounded-2xl object-cover border border-blue-500/40 shadow-lg shadow-blue-500/20" onerror="this.src='https://via.placeholder.com/48/3b82f6/ffffff?text=E'">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
+                            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                        </div>
                         <div>
                             <span class="text-2xl font-black tracking-wider text-white">EMSELL</span>
                             <span class="block text-[10px] text-blue-400 font-bold uppercase tracking-widest">Digital Marketplace</span>
@@ -233,7 +264,7 @@
                     </div>
                     <h1 class="text-3xl font-extrabold mb-4 leading-tight text-white">Безопасный рынок внутриигровых ценностей</h1>
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">
-                        Автоматизированная платформа торговых сделок. Покупайте и продавайте предметы, валюту, аккаунты и скрипты прямо с мобильного устройства.
+                        Платформа для прямого обмена и покупки игровых предметов, валюты, скриптов и аккаунтов.
                     </p>
                     
                     <div class="space-y-3 my-6">
@@ -241,13 +272,13 @@
                             <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                                 <i data-lucide="shield-check" class="w-4 h-4"></i>
                             </div>
-                            <span>Локальная база данных SQLite в Termux</span>
+                            <span>Безопасная локальная база данных</span>
                         </div>
                         <div class="flex items-center gap-3 text-xs text-gray-300">
                             <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                                 <i data-lucide="zap" class="w-4 h-4"></i>
                             </div>
-                            <span>Мгновенное чтение и публикация лотов</span>
+                            <span>Мгновенная публикация лотов</span>
                         </div>
                         <div class="flex items-center gap-3 text-xs text-gray-300">
                             <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
@@ -275,7 +306,7 @@
                 <form id="form-credentials" onsubmit="handleCredentialsSubmit(event)" class="space-y-4 fade-in">
                     <h2 id="auth-title" class="text-xl font-bold text-white mb-2">Авторизация</h2>
                     
-                    <div id="field-username" class="hidden">
+                    <div id="field-username">
                         <label class="block text-xs text-gray-400 mb-1">Ваш никнейм</label>
                         <div class="relative">
                             <span class="absolute left-3.5 top-3 text-gray-500 text-sm">@</span>
@@ -337,7 +368,9 @@
         <header class="glass-panel border-x-0 border-t-0 px-4 md:px-8 py-3.5 flex items-center justify-between sticky top-0 z-40 bg-[#08090b]/90 backdrop-blur-md border-b border-white/10">
             
             <div class="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity" onclick="showFeed()">
-                <img src="img.jpg" alt="EMSELL" class="w-9 h-9 rounded-xl object-cover border border-blue-500/40 shadow-sm shadow-blue-500/20" onerror="this.src='https://via.placeholder.com/36/3b82f6/ffffff?text=E'">
+                <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-600/30">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                </div>
                 <div>
                     <span class="font-extrabold tracking-wider text-lg text-white block leading-none">EMSELL</span>
                     <span class="text-[9px] text-blue-400 font-bold uppercase tracking-widest">Market</span>
@@ -353,7 +386,7 @@
                 </button>
             </div>
 
-            <!-- Правая панель пользователя -->
+            <!-- Правая панель пользователя без аватарки -->
             <div class="flex items-center gap-3">
                 <button onclick="openAddProductModal()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-lg shadow-blue-600/20 transition-all">
                     <i data-lucide="plus" class="w-4 h-4"></i>
@@ -362,12 +395,11 @@
 
                 <div class="h-6 w-[1px] bg-white/10 mx-1"></div>
 
-                <div class="flex items-center gap-2 bg-[#14151c] p-1.5 rounded-xl border border-white/5">
-                    <div class="w-7 h-7 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-xs">
-                        <span id="header-user-avatar">U</span>
-                    </div>
-                    <span id="header-user-name" class="text-xs font-semibold text-gray-200 hidden sm:inline pr-2">@user</span>
-                </div>
+                <!-- Кнопка профиля без круга аватарки -->
+                <button onclick="openProfileModal()" class="flex items-center gap-2 bg-[#14151c] hover:bg-[#1a1c26] px-3.5 py-2 rounded-xl border border-white/5 hover:border-blue-500/40 transition-all">
+                    <i data-lucide="user" class="w-4 h-4 text-blue-400"></i>
+                    <span id="header-user-name" class="text-xs font-semibold text-gray-200">@user</span>
+                </button>
             </div>
         </header>
 
@@ -399,13 +431,13 @@
                     <span id="product-count" class="text-xs text-gray-400 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 whitespace-nowrap">0 лотов</span>
                 </div>
 
-                <!-- Сетка карточек -->
+                <!-- Сетка карточек товаров (без картинок) -->
                 <div id="products-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    <!-- Заполняется динамически -->
+                    <!-- Динамическое наполнение -->
                 </div>
             </section>
 
-            <!-- СЕКЦИЯ 2: ИНДИВИДУАЛЬНЫЙ ЧАТ ПО ТОВАРУ (БЕЗ КНОПКИ ОПЛАТЫ) -->
+            <!-- СЕКЦИЯ 2: ИНДИВИДУАЛЬНЫЙ ЧАТ ПО ТОВАРУ -->
             <section id="chat-section" class="hidden flex-col h-[calc(100vh-140px)] fade-in">
                 
                 <!-- Шапка чата -->
@@ -423,7 +455,6 @@
                         </div>
                     </div>
 
-                    <!-- Блок стоимости без кнопки оплаты -->
                     <div class="flex items-center justify-between md:justify-end w-full md:w-auto border-t md:border-t-0 border-white/10 pt-3 md:pt-0 gap-4">
                         <div class="text-right">
                             <span class="text-[10px] text-gray-400 block uppercase font-medium">Стоимость лота</span>
@@ -437,7 +468,7 @@
                     <div class="flex flex-col items-center justify-center h-full opacity-40">
                         <i data-lucide="message-square-dashed" class="w-12 h-12 text-gray-400 mb-3"></i>
                         <span class="text-sm text-gray-300 text-center max-w-sm">
-                            Диалог открыт. Обсудите детали реквизитов и передачи предмета с продавцом.
+                            Диалог открыт. Обсудите реквизиты и детали передачи с продавцом.
                         </span>
                     </div>
                 </div>
@@ -458,13 +489,23 @@
 
     <!-- СКРИПТЫ И ВСЯ СИСТЕМНАЯ ЛОГИКА -->
     <script>
-        // --- КОНФИГУРАЦИЯ И ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
+        // Конфигурация EmailJS
         const CONFIG = {
-            TERMUX_API_URL: 'http://127.0.0.1:5000/api',
-            EMAILJS_SERVICE_ID: 'service_8jzpbgd',
-            EMAILJS_TEMPLATE_ID: 'template_fdi8qce',
-            EMAILJS_PUBLIC_KEY: 'DlCgYOGYgn2od0aoJ'
+            EMAILJS_SERVICE_ID: 'service_emsell',
+            EMAILJS_TEMPLATE_ID: 'template_otp',
+            EMAILJS_PUBLIC_KEY: 'YOUR_EMAILJS_PUBLIC_KEY'
         };
+
+        // Стандартные товары при первой загрузке
+        const DEFAULT_PRODUCTS = [
+            { id: 1, title: "Icebreaker Knife", price: 350, game: "MM2", seller: "admin", desc: "Топовый нож из зимнего ивента. Быстрая передача в игре." },
+            { id: 2, title: "Kitsune Fruit", price: 890, game: "Blox Fruits", seller: "deemiix", desc: "Физический фрукт Кицунэ. Передача через трейд на 2 море." },
+            { id: 3, title: "Shadow Dragon", price: 2500, game: "Adopt Me", seller: "pet_trader", desc: "Fly Ride дракон, чистое происхождение без бана." },
+            { id: 4, title: "Grow a Garden 2 Stock Bot", price: 1200, game: "Grow a Garden 2", seller: "coder_pro", desc: "Автоматический бот уведомлений о наличии редких стоков." },
+            { id: 5, title: "Leopard Fruit", price: 600, game: "Blox Fruits", seller: "gamer_99", desc: "Полный физический фрукт Леопард. В наличии 2 шт." },
+            { id: 6, title: "Candy Set", price: 450, game: "MM2", seller: "trader_pro", desc: "Сет Candy + Sugar. Передача моментально после оплаты." },
+            { id: 7, title: "Telegram Channel Auto-Mod Bot", price: 800, game: "Боты / Скрипты", seller: "dev_bot", desc: "Готовый Python скрипт автомодерации каналов." }
+        ];
 
         let state = {
             currentUser: null,
@@ -477,12 +518,12 @@
             pendingEmail: ''
         };
 
-        // --- ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ ---
+        // --- ИНИЦИАЛИЗАЦИЯ ---
         document.addEventListener("DOMContentLoaded", () => {
             lucide.createIcons();
             initEmailJS();
             checkAuthSession();
-            loadProductsFromTermux();
+            loadProducts();
         });
 
         function initEmailJS() {
@@ -491,8 +532,28 @@
                     emailjs.init(CONFIG.EMAILJS_PUBLIC_KEY);
                 }
             } catch (e) {
-                console.warn("EmailJS не инициализирован. Использование режима эмуляции кодов.");
+                console.warn("EmailJS не инициализирован. Коды выводятся в уведомление/консоль.");
             }
+        }
+
+        // --- РАБОТА С ЛОКАЛЬНЫМИ ДАННЫМИ (LOCAL STORAGE) ---
+        function loadProducts() {
+            const savedProducts = localStorage.getItem('emsell_products');
+            if (savedProducts) {
+                try {
+                    state.products = JSON.parse(savedProducts);
+                } catch(e) {
+                    state.products = DEFAULT_PRODUCTS;
+                }
+            } else {
+                state.products = DEFAULT_PRODUCTS;
+                localStorage.setItem('emsell_products', JSON.stringify(DEFAULT_PRODUCTS));
+            }
+            applyFilters();
+        }
+
+        function saveProducts() {
+            localStorage.setItem('emsell_products', JSON.stringify(state.products));
         }
 
         // --- УВЕДОМЛЕНИЯ (TOASTS) ---
@@ -525,73 +586,34 @@
             }, 3500);
         }
 
-        // --- РАБОТА С СЕРВЕРОМ TERMUX (PYTHON / SQLITE) ---
-        async function loadProductsFromTermux() {
-            try {
-                const response = await fetch(`${CONFIG.TERMUX_API_URL}/products`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        state.products = data;
-                        applyFilters();
-                        showToast("Товары загружены из SQLite на Termux", "success");
-                        return;
-                    }
-                }
-            } catch (error) {
-                console.log("Termux сервер выключен или недоступен. Загружаем стандартный локальный каталог.");
-            }
-
-            // Стандартный набор лотов если сервер выключен
-            state.products = [
-                { id: 1, title: "Icebreaker Knife", price: 350, game: "MM2", seller: "admin", image: "img.jpg", desc: "Топовый нож из зимнего ивента." },
-                { id: 2, title: "Kitsune Fruit", price: 890, game: "Blox Fruits", seller: "deemiix", image: "img.jpg", desc: "Физический фрукт Кицунэ, быстрая передача." },
-                { id: 3, title: "Shadow Dragon", price: 2500, game: "Adopt Me", seller: "seller1", image: "img.jpg", desc: "Fly Ride дракон, чистый инвентарь." },
-                { id: 4, title: "Grow a Garden 2 Stock Bot", price: 1200, game: "Grow a Garden 2", seller: "coder_pro", image: "img.jpg", desc: "Автоматический бот уведомлений о наличии стоков." },
-                { id: 5, title: "Leopard Fruit", price: 600, game: "Blox Fruits", seller: "gamer_99", image: "img.jpg", desc: "Полный физический фрукт Леопард." },
-                { id: 6, title: "Candy Set", price: 450, game: "MM2", seller: "trader_pro", image: "img.jpg", desc: "Candy + Sugar сет." },
-                { id: 7, title: "Telegram AutoModerator Bot", price: 800, game: "Боты / Скрипты", seller: "dev_bot", image: "img.jpg", desc: "Скрипт автомодерации каналов Python/Aiogram." }
-            ];
-            applyFilters();
-        }
-
-        async function handleCreateProduct(e) {
+        // --- ДОБАВЛЕНИЕ НОВОГО ТОВАРА ---
+        function handleCreateProduct(e) {
             e.preventDefault();
             
+            const title = document.getElementById('new-prod-title').value.trim();
+            const price = parseInt(document.getElementById('new-prod-price').value);
+            const game = document.getElementById('new-prod-game').value;
+            const desc = document.getElementById('new-prod-desc').value.trim();
+
+            const sellerName = (state.currentUser && state.currentUser.username) ? state.currentUser.username : 'seller';
+
             const newProduct = {
-                title: document.getElementById('new-prod-title').value.trim(),
-                price: parseInt(document.getElementById('new-prod-price').value),
-                game: document.getElementById('new-prod-game').value,
-                image: document.getElementById('new-prod-image').value.trim() || 'img.jpg',
-                seller: state.currentUser ? state.currentUser.username : 'seller',
-                desc: document.getElementById('new-prod-desc').value.trim()
+                id: Date.now(),
+                title: title,
+                price: price,
+                game: game,
+                seller: sellerName,
+                desc: desc || 'Описание отсутствует.'
             };
 
-            try {
-                const response = await fetch(`${CONFIG.TERMUX_API_URL}/products`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newProduct)
-                });
-
-                if (response.ok) {
-                    showToast("Товар успешно сохранен в базе Termux!", "success");
-                    loadProductsFromTermux();
-                    closeAddProductModal();
-                    return;
-                }
-            } catch (err) {
-                console.log("Запись на локальный сервер не удалась, добавляем локально.");
-            }
-
-            newProduct.id = Date.now();
             state.products.unshift(newProduct);
+            saveProducts();
             applyFilters();
             closeAddProductModal();
-            showToast("Товар успешно добавлен!", "success");
+            showToast("Товар успешно опубликован!", "success");
         }
 
-        // --- РЕНДЕРИНГ КАРТОЧЕК И АНИМАЦИЯ ---
+        // --- РЕНДЕРИНГ КАРТОЧЕК БЕЗ КАРТИНОК И АВАТАРОК ---
         function renderProducts(items) {
             const container = document.getElementById('products-list');
             document.getElementById('product-count').innerText = items.length + ' лотов';
@@ -599,10 +621,10 @@
 
             if (items.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full py-12 flex flex-col items-center justify-center text-center opacity-50">
+                    <div class="col-span-full py-16 flex flex-col items-center justify-center text-center opacity-50">
                         <i data-lucide="package-open" class="w-12 h-12 mb-3 text-gray-500"></i>
-                        <p class="text-sm text-gray-300 font-medium">Ничего не найдено</p>
-                        <p class="text-xs text-gray-500 mt-1">Попробуйте изменить категорию или поисковый запрос</p>
+                        <p class="text-sm text-gray-300 font-medium">Лото​в не найдено</p>
+                        <p class="text-xs text-gray-500 mt-1">Попробуйте выберите другую категорию или сбросьте поиск</p>
                     </div>
                 `;
                 lucide.createIcons();
@@ -611,22 +633,22 @@
 
             items.forEach((p) => {
                 const card = document.createElement('div');
-                card.className = 'glass-card glass-card-hover p-4 rounded-2xl product-card flex flex-col justify-between relative';
+                card.className = 'glass-card glass-card-hover p-5 rounded-2xl product-card flex flex-col justify-between relative border border-white/5';
                 
                 const safeTitle = p.title.replace(/'/g, "\\'");
-                const safeSeller = p.seller.replace(/'/g, "\\'");
+                const safeSeller = p.seller ? p.seller.replace(/'/g, "\\'") : 'seller';
 
                 card.innerHTML = `
                     <div>
-                        <div class="relative overflow-hidden rounded-xl mb-3 border border-white/10 group">
-                            <img src="${p.image || 'img.jpg'}" class="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='img.jpg'">
-                            <span class="absolute top-2 left-2 text-[9px] font-extrabold uppercase tracking-wider bg-black/70 backdrop-blur-md text-blue-400 px-2.5 py-1 rounded-md border border-white/10">${p.game}</span>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[9px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-400 px-2.5 py-1 rounded-md border border-blue-500/30">${p.game}</span>
+                            <span class="text-xs text-gray-400">от <span class="text-blue-400 font-medium">@${p.seller || 'seller'}</span></span>
                         </div>
-                        <h3 class="text-base font-bold text-white leading-snug truncate">${p.title}</h3>
-                        <p class="text-xs text-gray-400 mt-1">Продавец: <span class="text-blue-400 font-medium">@${p.seller}</span></p>
+                        <h3 class="text-base font-bold text-white leading-snug mb-2">${p.title}</h3>
+                        <p class="text-xs text-gray-400 line-clamp-3 leading-relaxed mb-4">${p.desc || 'Без описания'}</p>
                     </div>
                     
-                    <div class="flex items-center justify-between mt-5 pt-3 border-t border-white/5">
+                    <div class="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
                         <span class="text-lg font-black text-emerald-400">${p.price} ₽</span>
                         <button onclick="openChat(${p.id}, '${safeTitle}', '${safeSeller}', ${p.price}, '${p.game}')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-600/20 flex items-center gap-1.5">
                             <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Написать
@@ -646,11 +668,11 @@
                     if (entry.isIntersecting) {
                         setTimeout(() => {
                             entry.target.classList.add('reveal');
-                        }, (index % 4) * 75);
+                        }, (index % 4) * 60);
                         observer.unobserve(entry.target);
                     }
                 });
-            }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+            }, { threshold: 0.05 });
 
             document.querySelectorAll('.product-card:not(.reveal)').forEach(card => {
                 observer.observe(card);
@@ -695,13 +717,13 @@
                 const matchesSearch = !state.searchQuery || 
                     p.title.toLowerCase().includes(state.searchQuery) || 
                     p.game.toLowerCase().includes(state.searchQuery) ||
-                    p.seller.toLowerCase().includes(state.searchQuery);
+                    (p.seller && p.seller.toLowerCase().includes(state.searchQuery));
                 return matchesCategory && matchesSearch;
             });
             renderProducts(state.filteredProducts);
         }
 
-        // --- ЛОГИКА ЧАТА ПО ТОВАРУ ---
+        // --- ЛОГИКА ЧАТА ---
         function openChat(productId, title, seller, price, game) {
             state.currentChatProductId = productId;
 
@@ -719,7 +741,7 @@
                 <div class="flex flex-col items-center justify-center h-full opacity-40 fade-in">
                     <i data-lucide="message-square-dashed" class="w-12 h-12 text-gray-400 mb-3"></i>
                     <span class="text-sm text-gray-300 text-center max-w-sm">
-                        Чат по товару открыт.<br>Договоритесь об оплате и передаче предмета напрямую.
+                        Чат по товару открыт.<br>Обсудите реквизиты и детали передачи предмета.
                     </span>
                 </div>
             `;
@@ -764,11 +786,58 @@
             document.getElementById('form-create-product').reset();
         }
 
-        // --- АВТОРИЗАЦИЯ И ОТПРАВКА КОДА НА ПОЧТУ ---
+        // --- УПРАВЛЕНИЕ ПРОФИЛЕМ (BIO) ---
+        function openProfileModal() {
+            if (!state.currentUser) return;
+            document.getElementById('profile-modal-username').innerText = `@${state.currentUser.username || 'user'}`;
+            document.getElementById('profile-modal-email').innerText = state.currentUser.email || 'user@example.com';
+            document.getElementById('profile-bio-input').value = state.currentUser.bio || '';
+            document.getElementById('modal-profile').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('modal-profile').classList.add('hidden');
+        }
+
+        function handleSaveProfileBio(e) {
+            e.preventDefault();
+            const bioText = document.getElementById('profile-bio-input').value.trim();
+            if (state.currentUser) {
+                state.currentUser.bio = bioText;
+                localStorage.setItem('emsell_user', JSON.stringify(state.currentUser));
+                showToast("Описание профиля успешно сохранено!", "success");
+            }
+            closeProfileModal();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('emsell_user');
+            state.currentUser = null;
+            closeProfileModal();
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('flex');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            showToast("Вы вышли из аккаунта", "info");
+        }
+
+        // --- АВТОРИЗАЦИЯ И УСТРАНЕНИЕ ОШИБКИ @undefined ---
         function checkAuthSession() {
             const savedUser = localStorage.getItem('emsell_user');
             if (savedUser) {
-                state.currentUser = JSON.parse(savedUser);
+                try {
+                    state.currentUser = JSON.parse(savedUser);
+                    // Проверка на случай если username undefined
+                    if (!state.currentUser || !state.currentUser.username) {
+                        state.currentUser = { 
+                            username: 'user_' + Math.floor(1000 + Math.random() * 9000), 
+                            email: 'user@example.com',
+                            bio: ''
+                        };
+                        localStorage.setItem('emsell_user', JSON.stringify(state.currentUser));
+                    }
+                } catch(e) {
+                    state.currentUser = { username: 'user_1001', email: 'user@example.com', bio: '' };
+                }
                 applyUserSession();
             }
         }
@@ -779,8 +848,8 @@
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('main-app').classList.add('flex');
 
-            document.getElementById('header-user-name').innerText = `@${state.currentUser.username}`;
-            document.getElementById('header-user-avatar').innerText = state.currentUser.username.charAt(0).toUpperCase();
+            const uname = state.currentUser.username || 'user';
+            document.getElementById('header-user-name').innerText = `@${uname}`;
         }
 
         function switchAuthMode(mode) {
@@ -791,7 +860,6 @@
             document.getElementById('form-otp').classList.add('hidden');
 
             document.getElementById('auth-title').innerText = isReg ? 'Регистрация' : (isReset ? 'Восстановление доступа' : 'Авторизация');
-            document.getElementById('field-username').classList.toggle('hidden', !isReg);
 
             if (isReset) {
                 document.getElementById('field-password').classList.add('hidden');
@@ -818,14 +886,15 @@
             e.preventDefault();
             const email = document.getElementById('auth-email').value.trim();
             const usernameInput = document.getElementById('auth-username').value.trim();
-            const username = usernameInput || email.split('@')[0];
+            
+            // Гарантируем, что никнейм не будет undefined
+            const username = usernameInput || (email.split('@')[0] || ('user_' + Math.floor(1000 + Math.random() * 9000)));
 
             state.pendingEmail = email;
             state.generatedOTP = generateOTPCode();
 
             showToast("Отправка кода на почту...", "info");
 
-            // Попытка отправки через EmailJS
             try {
                 if (typeof emailjs !== 'undefined' && CONFIG.EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
                     await emailjs.send(CONFIG.EMAILJS_SERVICE_ID, CONFIG.EMAILJS_TEMPLATE_ID, {
@@ -835,21 +904,19 @@
                     });
                     showToast(`Код отправлен на ${email}`, "success");
                 } else {
-                    // Эмуляция отправки для локального тестирования
                     console.log(`[EMSELL OTP TEST CODE]: ${state.generatedOTP}`);
-                    showToast(`Тестовый код авторизации: ${state.generatedOTP}`, "success");
+                    showToast(`Код подтверждения: ${state.generatedOTP}`, "success");
                 }
             } catch (error) {
-                console.warn("Ошибка EmailJS, вывод кода в консоль и тоаст:", error);
-                showToast(`Тестовый код авторизации: ${state.generatedOTP}`, "info");
+                console.warn("EmailJS error:", error);
+                showToast(`Код подтверждения: ${state.generatedOTP}`, "info");
             }
 
             document.getElementById('target-email-disp').innerText = email;
             document.getElementById('form-credentials').classList.add('hidden');
             document.getElementById('form-otp').classList.remove('hidden');
             
-            // Сохраняем логин
-            state.currentUser = { email, username };
+            state.currentUser = { email, username, bio: '' };
         }
 
         function handleOTPSubmit(e) {
@@ -872,4 +939,4 @@
         }
     </script>
 </body>
-                                </html>
+</html>
